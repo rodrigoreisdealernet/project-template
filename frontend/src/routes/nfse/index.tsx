@@ -15,9 +15,17 @@ export function isLowConfidence(confidence: unknown): boolean {
   return typeof confidence === "number" && confidence < LOW_CONFIDENCE_THRESHOLD;
 }
 
-// A row needs a human's review when its confidence is a number below the threshold.
+// Confidence the model reports must be a probability in [0, 1]. Anything outside
+// that range is a malformed/hallucinated score (e.g. 1.5 -> "150%") and must NOT
+// be trusted as "high confidence" — it needs a human's eyes.
+export function isOutOfRangeConfidence(confidence: unknown): boolean {
+  return typeof confidence === "number" && (confidence < 0 || confidence > 1);
+}
+
+// A row needs a human's review when its confidence is below the threshold OR an
+// out-of-range (impossible) value. Out-of-range must never silently pass as good.
 export function needsReview(row: { confidence: number | null }): boolean {
-  return isLowConfidence(row.confidence);
+  return isLowConfidence(row.confidence) || isOutOfRangeConfidence(row.confidence);
 }
 
 // How many rows still need review (low confidence).
@@ -44,8 +52,17 @@ interface ExtractionRow {
 }
 
 function formatBRL(value: unknown): string {
-  if (typeof value !== "number") return "—";
+  // Guard non-finite numbers (NaN/±Infinity) — toLocaleString would render them
+  // as "R$ NaN" / "R$ ∞" instead of a clean placeholder.
+  if (typeof value !== "number" || !Number.isFinite(value)) return "—";
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+// Whether a source_url is safe to render as a clickable link. The source_url comes
+// from the external source API (untrusted) and is stored verbatim; only http(s)
+// links may become an <a href> to avoid javascript:/data: stored-XSS vectors.
+function isSafeHttpUrl(url: unknown): boolean {
+  return typeof url === "string" && /^https?:\/\//i.test(url);
 }
 
 async function fetchExtractions(): Promise<ExtractionRow[]> {
@@ -62,7 +79,7 @@ export const Route = createFileRoute("/nfse/")({
   component: NfseExtractionsPage,
 });
 
-function NfseExtractionsPage() {
+export function NfseExtractionsPage() {
   const queryClient = useQueryClient();
   const {
     data: rows,
@@ -197,7 +214,8 @@ function NfseExtractionsPage() {
             <tbody>
               {visibleRows.map((row) => {
                 const f = row.extracted_fields ?? {};
-                const low = isLowConfidence(row.confidence);
+                // Flag both genuinely-low and impossible (out-of-range) scores.
+                const low = needsReview(row);
                 return (
                   <tr key={row.id} className="border-t" data-testid="nfse-row">
                     <td className="px-4 py-2">{f.numero_nota ?? "—"}</td>
@@ -222,7 +240,7 @@ function NfseExtractionsPage() {
                       )}
                     </td>
                     <td className="px-4 py-2">
-                      {row.source_url ? (
+                      {isSafeHttpUrl(row.source_url) ? (
                         <a
                           href={row.source_url}
                           target="_blank"

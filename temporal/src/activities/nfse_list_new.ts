@@ -121,10 +121,13 @@ async function fetchExistingSourceUrls(urls: string[]): Promise<Set<string>> {
     Authorization: `Bearer ${config.supabaseServiceKey}`,
   };
   for (const batch of chunk(urls, CHUNK_SIZE)) {
-    // Build `in.("url1","url2",...)`: double-quote each value (escaping any " inside)
-    // and join with commas, then encode the whole filter value so reserved chars in
-    // the URLs travel safely over the query string.
-    const list = batch.map((u) => `"${u.replace(/"/g, '\\"')}"`).join(",");
+    // Build `in.("url1","url2",...)`: double-quote each value and join with commas,
+    // then encode the whole filter value so reserved chars in the URLs travel safely
+    // over the query string. PostgREST escapes an embedded double-quote by DOUBLING
+    // it (""), CSV-style — not with a backslash. Getting this wrong makes the filter
+    // misparse, which would re-process an already-extracted invoice (duplicate model
+    // spend) or fail the whole chunk read (silent skip).
+    const list = batch.map((u) => `"${u.replace(/"/g, '""')}"`).join(",");
     const filter = encodeURIComponent(`in.(${list})`);
     const url =
       `${config.supabaseUrl}/rest/v1/workflow_document_extractions` +
@@ -149,23 +152,35 @@ export async function nfse_list_new(args: NfseListNewArgs = {}): Promise<NfseLis
   // Fetch the (small) source list first; dedup is then a bounded membership read
   // over exactly those content_urls (no full-table scan).
   const all = await fetchSourceInvoices(baseUrl);
-  const existing = await fetchExistingSourceUrls(all.map((inv) => inv.content_url));
 
-  const invoices = all.filter((inv) => !existing.has(inv.content_url));
+  // De-duplicate WITHIN the batch by content_url before anything else: the source
+  // API may list the same invoice twice in one response, and content_url is our
+  // dedup key. Processing it twice would mean duplicate (paid) model calls and two
+  // upserts onto the same row. Keep the first occurrence.
+  const seenInBatch = new Set<string>();
+  const unique = all.filter((inv) => {
+    if (seenInBatch.has(inv.content_url)) return false;
+    seenInBatch.add(inv.content_url);
+    return true;
+  });
+
+  const existing = await fetchExistingSourceUrls(unique.map((inv) => inv.content_url));
+
+  const invoices = unique.filter((inv) => !existing.has(inv.content_url));
   const run_at = new Date().toISOString();
 
   safeLogInfo("nfse_list_new", {
     source: baseUrl,
-    total: all.length,
+    total: unique.length,
     new: invoices.length,
-    skipped: all.length - invoices.length,
+    skipped: unique.length - invoices.length,
   });
 
   return {
     invoices,
     run_at,
-    total: all.length,
+    total: unique.length,
     new_count: invoices.length,
-    skipped_count: all.length - invoices.length,
+    skipped_count: unique.length - invoices.length,
   };
 }

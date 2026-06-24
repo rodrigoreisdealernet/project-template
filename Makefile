@@ -82,6 +82,7 @@ reset:
 	$(COMPOSE_CMD) down -v
 	-supabase stop --no-backup
 	$(MAKE) up
+	-$(MAKE) bootstrap-users
 
 logs:
 	$(COMPOSE_CMD) logs -f
