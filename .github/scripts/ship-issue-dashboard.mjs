@@ -217,6 +217,13 @@ export function renderShipIssueDashboard(model) {
             ? `<div class="banner ok">✓ Pipeline complete.</div>`
             : "";
 
+  const running = model.steps.find((s) => s.status === "running");
+  const runningDef = running ? defById[running.id] : null;
+  const lastNote = running && running.notes.length ? running.notes[running.notes.length - 1] : null;
+  const activityBanner = running
+    ? `<div class="banner live"><span class="pulse" aria-hidden="true"></span> Running <strong>${esc(runningDef.n)} ${esc(runningDef.name)}</strong>${lastNote ? ` — ${esc(lastNote)}` : " …"}</div>`
+    : "";
+
   const prLink = model.pr?.number
     ? `<a href="${esc(model.pr.url ?? "#")}">PR #${esc(model.pr.number)}</a>`
     : '<span class="muted">no PR yet</span>';
@@ -285,6 +292,9 @@ export function renderShipIssueDashboard(model) {
       .progress-label { font-size:12px; color:var(--muted); }
       .banner { padding:10px 14px; border-radius:8px; margin:14px 0; font-size:13px; }
       .banner.gate { background:rgba(245,158,11,.12); border:1px solid var(--wait); }
+      .banner.live { background:rgba(234,179,8,.12); border:1px solid var(--run); display:flex; align-items:center; }
+      .pulse { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--run); margin-right:8px; animation:pulse 1.2s ease-in-out infinite; }
+      @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.3; transform:scale(.7); } }
       .banner.ok { background:rgba(34,197,94,.12); border:1px solid var(--ok); }
       .banner.fail { background:rgba(239,68,68,.12); border:1px solid var(--fail); }
       .banner code { background:rgba(255,255,255,.08); padding:1px 5px; border-radius:4px; }
@@ -333,6 +343,7 @@ export function renderShipIssueDashboard(model) {
         <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
         <div class="progress-label">${doneCount} / ${total} steps complete (${pct}%)</div>
       </header>
+      ${activityBanner}
       ${gateBanner}
       <ol class="steps">
 ${rows}

@@ -111,6 +111,20 @@ describe("renderShipIssueDashboard", () => {
     expect(renderShipIssueDashboard(complete)).not.toContain('http-equiv="refresh"');
   });
 
+  it("shows a live activity banner with the running step's latest note", () => {
+    let run = setStep(newRun(), "code", { status: "running" });
+    run = setStep(run, "code", { note: "writing formatDateBR helper" });
+    const html = renderShipIssueDashboard(run);
+    expect(html).toContain("Running");
+    expect(html).toContain("Code");
+    expect(html).toContain("writing formatDateBR helper");
+    expect(html).toContain("pulse");
+    // no live banner once nothing is running
+    let complete = newRun();
+    for (const def of STEP_DEFS) complete = setStep(complete, def.id, { status: "done" });
+    expect(renderShipIssueDashboard(complete)).not.toContain('class="pulse"');
+  });
+
   it("renders the human-gate banners", () => {
     const specGate = setMeta(setStep(newRun(), "approve", { status: "waiting" }), { gate: "spec-approval" });
     expect(renderShipIssueDashboard(specGate)).toContain("approve the spec");
