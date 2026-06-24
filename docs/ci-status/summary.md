@@ -1,15 +1,15 @@
 # Engineering health dashboard
 
-Generated: 2026-06-24 21:32Z
+Generated: 2026-06-24 21:52Z
 
 ## CI suites
 
 | Suite | Last outcome | Last run | Pass 24h | Pass 7d | SLO | Streak |
 |---|---|---|---:|---:|---|---:|
 | `unit` | — | — | — | — | — | 0 |
-| `temporal` | ✅ passed | 2026-06-24 20:58Z | 100% (6) | 100% (6) | — | 6 |
-| `helm` | ✅ passed | — | — | — | — | 6 |
-| `seed` | ✅ passed | — | — | — | — | 6 |
+| `temporal` | ✅ passed | 2026-06-24 21:35Z | 100% (8) | 100% (8) | — | 8 |
+| `helm` | ✅ passed | — | — | — | — | 8 |
+| `seed` | ✅ passed | — | — | — | — | 8 |
 
 ## E2E suites
 
@@ -22,7 +22,7 @@ Generated: 2026-06-24 21:32Z
 
 | Env×Cloud | Last deployed | SHA | Outcome | Pass 7d | Staleness |
 |---|---|---|---|---:|---|
-| `dev-azure` | 2026-06-24 21:31Z | `83fb07f` | ⏭️ skipped | 0% (7) | 0h |
+| `dev-azure` | 2026-06-24 21:35Z | `f86275b` | ⏭️ skipped | 0% (8) | 0h |
 
 ## Code quality
 
@@ -40,7 +40,7 @@ Generated: 2026-06-24 21:32Z
 | Workflow | Last run | Outcome |
 |---|---|---|
 | `pipeline-daily` | — | — |
-| `monitor-actions` | 2026-06-24 20:18Z | ✅ passed |
+| `monitor-actions` | 2026-06-24 21:52Z | ✅ passed |
 | `validate-dsl-definitions` | 2026-06-24 20:37Z | 🟠 error |
 | `validate-ontology` | — | — |
 
