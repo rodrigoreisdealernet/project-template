@@ -58,6 +58,21 @@ function formatBRL(value: unknown): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// Format a date-only ISO string (YYYY-MM-DD) to Brazilian locale (DD/MM/AAAA).
+// We parse the Y/M/D parts directly instead of using new Date(...), which would
+// interpret a date-only string as UTC midnight and can shift the calendar date in
+// the local timezone. Anything that isn't a valid YYYY-MM-DD date → "—".
+export function formatDateBR(value: unknown): string {
+  if (typeof value !== "string") return "—";
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return "—";
+  const [, year, month, day] = match;
+  const monthNum = Number(month);
+  const dayNum = Number(day);
+  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) return "—";
+  return `${day}/${month}/${year}`;
+}
+
 // Whether a source_url is safe to render as a clickable link. The source_url comes
 // from the external source API (untrusted) and is stored verbatim; only http(s)
 // links may become an <a href> to avoid javascript:/data: stored-XSS vectors.
@@ -222,7 +237,7 @@ export function NfseExtractionsPage() {
                     <td className="px-4 py-2">{f.prestador_razao_social ?? "—"}</td>
                     <td className="px-4 py-2">{f.tomador_razao_social ?? "—"}</td>
                     <td className="px-4 py-2 text-right">{formatBRL(f.valor_total)}</td>
-                    <td className="px-4 py-2">{f.data_emissao ?? "—"}</td>
+                    <td className="px-4 py-2">{formatDateBR(f.data_emissao)}</td>
                     <td className="px-4 py-2">
                       {row.confidence == null ? (
                         "—"
