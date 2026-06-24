@@ -1,15 +1,15 @@
 # Engineering health dashboard
 
-Generated: 2026-06-24 19:23Z
+Generated: 2026-06-24 20:00Z
 
 ## CI suites
 
 | Suite | Last outcome | Last run | Pass 24h | Pass 7d | SLO | Streak |
 |---|---|---|---:|---:|---|---:|
-| `unit` | ✅ passed | 2026-06-24 19:20Z | 100% (3) | 100% (3) | — | 3 |
-| `temporal` | ✅ passed | 2026-06-24 19:21Z | 100% (4) | 100% (4) | — | 4 |
-| `helm` | ✅ passed | — | — | — | — | 4 |
-| `seed` | ✅ passed | — | — | — | — | 4 |
+| `unit` | — | — | — | — | — | 0 |
+| `temporal` | — | — | — | — | — | 0 |
+| `helm` | — | — | — | — | — | 0 |
+| `seed` | — | — | — | — | — | 0 |
 
 ## E2E suites
 
@@ -22,13 +22,12 @@ Generated: 2026-06-24 19:23Z
 
 | Env×Cloud | Last deployed | SHA | Outcome | Pass 7d | Staleness |
 |---|---|---|---|---:|---|
-| `dev-azure` | 2026-06-24 19:20Z | `7ce7e5a` | ⏭️ skipped | 0% (4) | 0h |
+| `dev-azure` | 2026-06-24 20:00Z | `c809ecc` | ⏭️ skipped | 0% (1) | 0h |
 
 ## Code quality
 
 | Workflow | Last run | Outcome | Metrics |
 |---|---|---|---|
-| `validate-ontology` | 2026-06-24 18:12Z | ✅ passed | failed_jobs=0, skipped_jobs=0 |
 
 ## Security & audits
 
@@ -40,9 +39,9 @@ Generated: 2026-06-24 19:23Z
 | Workflow | Last run | Outcome |
 |---|---|---|
 | `pipeline-daily` | — | — |
-| `monitor-actions` | 2026-06-24 18:28Z | ✅ passed |
+| `monitor-actions` | — | — |
 | `validate-dsl-definitions` | — | — |
-| `validate-ontology` | 2026-06-24 18:12Z | ✅ passed |
+| `validate-ontology` | — | — |
 
 ## Unstable tests
 
