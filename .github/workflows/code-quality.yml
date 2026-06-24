@@ -82,6 +82,10 @@ jobs:
       - name: eslint (json)
         continue-on-error: true
         working-directory: frontend
+        # eslint 9 defaults to flat config; this project still uses the legacy
+        # .eslintrc.cjs (+ the --ext flag), so force eslintrc mode.
+        env:
+          ESLINT_USE_FLAT_CONFIG: "false"
         run: npx eslint . --ext .ts,.tsx -f json -o ../results/eslint.json || true
       - name: ruff (json)
         continue-on-error: true
