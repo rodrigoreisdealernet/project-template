@@ -9,7 +9,25 @@ spec, then code, tests, a test review, and a code review — with humans steppin
 in at only **two** moments: approving the spec and merging the PR.
 
 > **Agents are the workers. Workflows chain them.** This command is the workflow.
-> The workers live in `.claude/agents/`: `spec`, `coder`, `tester`, `reviewer`.
+> The four roles live in `.claude/agents/`: `spec`, `coder`, `tester`, `reviewer`.
+> See **How agents are spawned** below for exactly how to run each one.
+
+## How agents are spawned (important)
+
+The files in `.claude/agents/` are **role specifications**, not reliable custom
+`subagent_type`s in this environment — custom agent types here often fail to
+invoke their tools. So wherever a step says "invoke the **`<role>`** subagent",
+do this instead:
+
+- **Spawn a built-in agent** with the Agent tool:
+  - `coder`, `tester` → `subagent_type: general-purpose` (they read, edit, write, run bash).
+  - `spec`, `reviewer` → `subagent_type: Explore` (read-only — Explore reads, greps,
+    globs, and runs bash for `gh`, but cannot edit; exactly what these roles need).
+- **Inject the role**: tell the subagent to first read its role file
+  `.claude/agents/<role>.agent.md` and follow it, then give it the concrete inputs
+  for this run (issue number/body, spec path, diff, PR number, reviewer mode, etc.).
+  The subagent runs in an isolated context, so pass every path and value explicitly
+  — never assume it can see this conversation.
 
 ## Arguments
 

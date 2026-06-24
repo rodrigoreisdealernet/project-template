@@ -4,10 +4,12 @@ description: >
   Implements an approved spec against the codebase, producing a focused diff.
   Writes no tests.
 tools:
-  - read
-  - search
-  - edit
-  - bash
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - Bash
 ---
 
 # Coder Agent

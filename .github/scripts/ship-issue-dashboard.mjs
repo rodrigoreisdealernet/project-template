@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // ship-issue-dashboard — status page for the /ship-issue pipeline.
 //
 // Renders a single self-contained HTML file (inline CSS, no external assets)
