@@ -4,8 +4,9 @@ description: >
   Turns a GitHub issue into a short, testable spec written in customer-language
   acceptance criteria.
 tools:
-  - read
-  - search
+  - Read
+  - Grep
+  - Glob
 ---
 
 # Spec Agent

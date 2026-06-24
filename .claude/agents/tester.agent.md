@@ -2,10 +2,12 @@
 name: tester
 description: Generates the test pyramid (unit, integration, end-to-end) for an implemented change.
 tools:
-  - read
-  - search
-  - edit
-  - bash
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - Bash
 ---
 
 # Tester Agent

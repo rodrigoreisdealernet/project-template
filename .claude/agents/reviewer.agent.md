@@ -5,9 +5,10 @@ description: >
   assertions (step 05); `diff` code-reviews the change and posts the review on
   the PR (step 06).
 tools:
-  - read
-  - search
-  - bash
+  - Read
+  - Grep
+  - Glob
+  - Bash
 ---
 
 # Reviewer Agent
