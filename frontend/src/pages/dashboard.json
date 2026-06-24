@@ -1,0 +1,712 @@
+{
+  "id": "dashboard",
+  "title": "Operational Dashboard",
+  "state": {},
+  "dataSources": {
+    "portfolios": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "id",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "portfolio" }]
+    },
+    "assessments": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "id",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "assessment" }]
+    },
+    "evidence": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "id",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "evidence" }]
+    },
+    "groups": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "id",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "group" }]
+    },
+    "portfolios_latest": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "updated_at::date",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "portfolio" }],
+      "order": [{ "column": "updated_at", "ascending": false }],
+      "limit": 1
+    },
+    "assessments_latest": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "updated_at::date",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "assessment" }],
+      "order": [{ "column": "updated_at", "ascending": false }],
+      "limit": 1
+    },
+    "evidence_latest": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "updated_at::date",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "evidence" }],
+      "order": [{ "column": "updated_at", "ascending": false }],
+      "limit": 1
+    },
+    "groups_latest": {
+      "type": "supabase",
+      "table": "entities",
+      "select": "updated_at::date",
+      "filters": [{ "field": "entity_type", "op": "eq", "value": "group" }],
+      "order": [{ "column": "updated_at", "ascending": false }],
+      "limit": 1
+    }
+  },
+  "layout": {
+    "type": "Stack",
+    "props": { "spacing": 8 },
+    "children": [
+      {
+        "type": "Card",
+        "props": {
+          "className": "bg-gradient-to-br from-[hsl(243,75%,58%)] to-[hsl(258,60%,48%)] border-0 text-white shadow-lg"
+        },
+        "children": [
+          {
+            "type": "Stack",
+            "props": { "spacing": 3, "className": "p-2" },
+            "children": [
+              {
+                "type": "Badge",
+                "props": {
+                  "variant": "secondary",
+                  "className": "w-fit bg-white/20 text-white border-0 hover:bg-white/30",
+                  "children": "Live data · operator workspace"
+                }
+              },
+              {
+                "type": "Heading",
+                "props": {
+                  "level": 1,
+                  "className": "text-white",
+                  "children": "Operational dashboard"
+                }
+              },
+              {
+                "type": "Text",
+                "props": {
+                  "className": "text-white/80 max-w-2xl",
+                  "children": "See what is live right now, spot gaps in coverage, and jump straight into the working set that needs action."
+                }
+              },
+              {
+                "type": "Stack",
+                "props": { "direction": "horizontal", "spacing": 3, "className": "pt-1" },
+                "children": [
+                  {
+                    "type": "Button",
+                    "props": {
+                      "className": "bg-white text-[hsl(243,75%,58%)] hover:bg-white/90 font-semibold shadow-sm",
+                      "onClick": { "action": "navigate", "to": "/entities/portfolio" },
+                      "children": "View Portfolios"
+                    }
+                  },
+                  {
+                    "type": "Button",
+                    "props": {
+                      "variant": "outline",
+                      "className": "border-white/40 text-white hover:bg-white/15",
+                      "onClick": { "action": "navigate", "to": "/entities/assessment" },
+                      "children": "View Assessments"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Stack",
+        "props": { "spacing": 2 },
+        "children": [
+          {
+            "type": "Heading",
+            "props": { "level": 2, "children": "Operational summary" }
+          },
+          {
+            "type": "Text",
+            "props": {
+              "variant": "muted",
+              "children": "Live KPIs update from the entity workspace so operators can see coverage, queue health, and where to drill in next."
+            }
+          }
+        ]
+      },
+      {
+        "type": "Grid",
+        "props": { "columns": 1, "gap": 4, "className": "md:grid-cols-2 xl:grid-cols-4" },
+        "children": [
+          {
+            "type": "Card",
+            "props": { "className": "h-full" },
+            "children": [
+              {
+                "type": "Stack",
+                "props": { "spacing": 4 },
+                "children": [
+                  {
+                    "type": "Stack",
+                    "props": { "direction": "horizontal", "justify": "between", "align": "center" },
+                    "children": [
+                      {
+                        "type": "Stack",
+                        "props": { "spacing": 1 },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "props": { "weight": "semibold", "children": "Portfolios in view" }
+                          },
+                          {
+                            "type": "Text",
+                            "props": {
+                              "variant": "muted",
+                              "size": "sm",
+                              "children": "Current operator coverage"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Badge",
+                        "props": {
+                          "variant": "{{data.portfolios === null ? 'outline' : data.portfolios.length === 0 ? 'destructive' : data.assessments.length < data.portfolios.length ? 'destructive' : 'secondary'}}",
+                          "children": "{{data.portfolios === null ? 'Loading...' : data.portfolios.length === 0 ? 'Needs setup' : data.assessments.length < data.portfolios.length ? 'Coverage gap' : 'Live'}}"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.portfolios === null",
+                    "type": "Stack",
+                    "props": { "spacing": 2 },
+                    "children": [
+                      {
+                        "type": "Skeleton",
+                        "props": { "className": "h-10 w-16" }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "size": "sm",
+                          "children": "Loading portfolio data — refresh the page if this persists."
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.portfolios !== null",
+                    "type": "Stack",
+                    "props": { "spacing": 3 },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "props": {
+                          "as": "div",
+                          "weight": "bold",
+                          "className": "text-4xl tracking-tight",
+                          "children": "{{data.portfolios.length}}"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "children": "{{data.portfolios.length === 0 ? 'No live portfolios yet — seed the workspace to start operator reviews.' : 'Portfolios are live in the working set.'}}"
+                        }
+                      },
+                      {
+                        "if": "data.assessments.length < data.portfolios.length",
+                        "type": "Alert",
+                        "props": {
+                          "variant": "warning",
+                          "title": "Coverage gap detected",
+                          "description": "Assessment queue is behind portfolio volume — open the queue to close the gap."
+                        }
+                      },
+                      {
+                        "if": "data.portfolios_latest.length > 0",
+                        "type": "Text",
+                        "props": {
+                          "size": "sm",
+                          "variant": "muted",
+                          "children": "Last activity: {{data.portfolios_latest[0].updated_at}}"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/portfolio",
+                          "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Open Portfolios →"
+                        }
+                      },
+                      {
+                        "if": "data.assessments.length < data.portfolios.length",
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/assessment",
+                          "className": "text-destructive font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Start assessment review →"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Card",
+            "props": { "className": "h-full" },
+            "children": [
+              {
+                "type": "Stack",
+                "props": { "spacing": 4 },
+                "children": [
+                  {
+                    "type": "Stack",
+                    "props": { "direction": "horizontal", "justify": "between", "align": "center" },
+                    "children": [
+                      {
+                        "type": "Stack",
+                        "props": { "spacing": 1 },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "props": { "weight": "semibold", "children": "Assessments in flight" }
+                          },
+                          {
+                            "type": "Text",
+                            "props": {
+                              "variant": "muted",
+                              "size": "sm",
+                              "children": "Active review queue"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Badge",
+                        "props": {
+                          "variant": "{{data.assessments === null ? 'outline' : data.assessments.length === 0 ? 'outline' : data.evidence.length < data.assessments.length ? 'destructive' : 'secondary'}}",
+                          "children": "{{data.assessments === null ? 'Loading...' : data.assessments.length === 0 ? 'Queue empty' : data.evidence.length < data.assessments.length ? 'Evidence lagging' : 'Active queue'}}"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.assessments === null",
+                    "type": "Stack",
+                    "props": { "spacing": 2 },
+                    "children": [
+                      {
+                        "type": "Skeleton",
+                        "props": { "className": "h-10 w-16" }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "size": "sm",
+                          "children": "Loading assessment data — refresh the page if this persists."
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.assessments !== null",
+                    "type": "Stack",
+                    "props": { "spacing": 3 },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "props": {
+                          "as": "div",
+                          "weight": "bold",
+                          "className": "text-4xl tracking-tight",
+                          "children": "{{data.assessments.length}}"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "children": "{{data.assessments.length === 0 ? 'No active assessments yet — the review queue is empty.' : 'Assessments are active in the review queue.'}}"
+                        }
+                      },
+                      {
+                        "if": "data.evidence.length < data.assessments.length",
+                        "type": "Alert",
+                        "props": {
+                          "variant": "warning",
+                          "title": "Evidence lagging",
+                          "description": "Evidence inventory is behind the assessment queue — prioritise intake to unblock reviews."
+                        }
+                      },
+                      {
+                        "if": "data.assessments_latest.length > 0",
+                        "type": "Text",
+                        "props": {
+                          "size": "sm",
+                          "variant": "muted",
+                          "children": "Last activity: {{data.assessments_latest[0].updated_at}}"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/assessment",
+                          "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Open Assessments →"
+                        }
+                      },
+                      {
+                        "if": "data.evidence.length < data.assessments.length",
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/evidence",
+                          "className": "text-destructive font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Intake evidence →"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Card",
+            "props": { "className": "h-full" },
+            "children": [
+              {
+                "type": "Stack",
+                "props": { "spacing": 4 },
+                "children": [
+                  {
+                    "type": "Stack",
+                    "props": { "direction": "horizontal", "justify": "between", "align": "center" },
+                    "children": [
+                      {
+                        "type": "Stack",
+                        "props": { "spacing": 1 },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "props": { "weight": "semibold", "children": "Evidence backlog" }
+                          },
+                          {
+                            "type": "Text",
+                            "props": {
+                              "variant": "muted",
+                              "size": "sm",
+                              "children": "Supporting records ready to review"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Badge",
+                        "props": {
+                          "variant": "{{data.evidence === null ? 'outline' : data.evidence.length === 0 ? 'outline' : 'secondary'}}",
+                          "children": "{{data.evidence === null ? 'Loading...' : data.evidence.length === 0 ? 'Needs intake' : 'Review ready'}}"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.evidence === null",
+                    "type": "Stack",
+                    "props": { "spacing": 2 },
+                    "children": [
+                      {
+                        "type": "Skeleton",
+                        "props": { "className": "h-10 w-16" }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "size": "sm",
+                          "children": "Loading evidence data — refresh the page if this persists."
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.evidence !== null",
+                    "type": "Stack",
+                    "props": { "spacing": 3 },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "props": {
+                          "as": "div",
+                          "weight": "bold",
+                          "className": "text-4xl tracking-tight",
+                          "children": "{{data.evidence.length}}"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "children": "{{data.evidence.length === 0 ? 'No evidence is loaded yet for review.' : 'Evidence records are ready for review and follow-up.'}}"
+                        }
+                      },
+                      {
+                        "if": "data.evidence_latest.length > 0",
+                        "type": "Text",
+                        "props": {
+                          "size": "sm",
+                          "variant": "muted",
+                          "children": "Last activity: {{data.evidence_latest[0].updated_at}}"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/evidence",
+                          "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Open Evidence →"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Card",
+            "props": { "className": "h-full" },
+            "children": [
+              {
+                "type": "Stack",
+                "props": { "spacing": 4 },
+                "children": [
+                  {
+                    "type": "Stack",
+                    "props": { "direction": "horizontal", "justify": "between", "align": "center" },
+                    "children": [
+                      {
+                        "type": "Stack",
+                        "props": { "spacing": 1 },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "props": { "weight": "semibold", "children": "Groups with coverage" }
+                          },
+                          {
+                            "type": "Text",
+                            "props": {
+                              "variant": "muted",
+                              "size": "sm",
+                              "children": "Segments ready for drill-down"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Badge",
+                        "props": {
+                          "variant": "{{data.groups === null ? 'outline' : data.groups.length === 0 ? 'destructive' : data.groups.length < data.portfolios.length ? 'destructive' : 'secondary'}}",
+                          "children": "{{data.groups === null ? 'Loading...' : data.groups.length === 0 ? 'Needs setup' : data.groups.length < data.portfolios.length ? 'Coverage gap' : 'Coverage live'}}"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.groups === null",
+                    "type": "Stack",
+                    "props": { "spacing": 2 },
+                    "children": [
+                      {
+                        "type": "Skeleton",
+                        "props": { "className": "h-10 w-16" }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "size": "sm",
+                          "children": "Loading group data — refresh the page if this persists."
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "if": "data.groups !== null",
+                    "type": "Stack",
+                    "props": { "spacing": 3 },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "props": {
+                          "as": "div",
+                          "weight": "bold",
+                          "className": "text-4xl tracking-tight",
+                          "children": "{{data.groups.length}}"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "props": {
+                          "variant": "muted",
+                          "children": "{{data.groups.length === 0 ? 'No groups are configured yet.' : 'Groups are available to segment operational work.'}}"
+                        }
+                      },
+                      {
+                        "if": "data.groups.length < data.portfolios.length",
+                        "type": "Alert",
+                        "props": {
+                          "variant": "warning",
+                          "title": "Group coverage gap",
+                          "description": "Group coverage is below portfolio volume — configure groups to segment the working set."
+                        }
+                      },
+                      {
+                        "if": "data.groups_latest.length > 0",
+                        "type": "Text",
+                        "props": {
+                          "size": "sm",
+                          "variant": "muted",
+                          "children": "Last activity: {{data.groups_latest[0].updated_at}}"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/group",
+                          "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Review Groups →"
+                        }
+                      },
+                      {
+                        "if": "data.groups.length < data.portfolios.length",
+                        "type": "Link",
+                        "props": {
+                          "to": "/entities/group",
+                          "className": "text-destructive font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                          "children": "Configure groups →"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Stack",
+        "props": { "spacing": 2 },
+        "children": [
+          {
+            "type": "Heading",
+            "props": { "level": 2, "children": "Quick access" }
+          },
+          {
+            "type": "Text",
+            "props": {
+              "variant": "muted",
+              "children": "Supporting navigation stays available, but the live operational summary stays first."
+            }
+          }
+        ]
+      },
+      {
+        "type": "Grid",
+        "props": { "columns": 1, "gap": 4, "className": "md:grid-cols-3" },
+        "children": [
+          {
+            "type": "Card",
+            "props": {
+              "title": "People",
+              "description": "Ownership and contact coverage"
+            },
+            "children": [
+              {
+                "type": "Text",
+                "props": {
+                  "variant": "muted",
+                  "size": "sm",
+                  "children": "Review who is attached to the current working set before following up on assessments."
+                }
+              },
+              {
+                "type": "Link",
+                "props": {
+                  "to": "/entities/person",
+                  "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                  "children": "Open People →"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Card",
+            "props": {
+              "title": "Evidence",
+              "description": "Supporting material"
+            },
+            "children": [
+              {
+                "type": "Text",
+                "props": {
+                  "variant": "muted",
+                  "size": "sm",
+                  "children": "Jump back into the evidence queue to close gaps highlighted in the KPI cards."
+                }
+              },
+              {
+                "type": "Link",
+                "props": {
+                  "to": "/entities/evidence",
+                  "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                  "children": "Review Evidence →"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Card",
+            "props": {
+              "title": "Groups",
+              "description": "Team and segment organisation"
+            },
+            "children": [
+              {
+                "type": "Text",
+                "props": {
+                  "variant": "muted",
+                  "size": "sm",
+                  "children": "Use groups to rebalance work when the dashboard flags thin coverage."
+                }
+              },
+              {
+                "type": "Link",
+                "props": {
+                  "to": "/entities/group",
+                  "className": "text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all",
+                  "children": "Open Groups →"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

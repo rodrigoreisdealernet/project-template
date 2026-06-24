@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e6]:
+        - generic [ref=e7]:
+          - link "Supabase" [ref=e9] [cursor=pointer]:
+            - /url: /project/default
+            - img "Supabase" [ref=e10]
+          - generic [ref=e11]:
+            - generic [ref=e12]:
+              - button "Search..." [ref=e13]:
+                - generic [ref=e14]:
+                  - img [ref=e15]
+                  - paragraph [ref=e18]: Search...
+                - generic [ref=e20]: Ctrl K
+              - button "Help" [ref=e21] [cursor=pointer]:
+                - generic [ref=e22]:
+                  - img [ref=e23]
+                  - generic [ref=e26]: Help
+              - button "Advisor Center" [ref=e28] [cursor=pointer]:
+                - generic [ref=e29]:
+                  - img [ref=e30]
+                  - generic [ref=e32]: Advisor Center
+            - button "Settings" [ref=e33] [cursor=pointer]:
+              - generic [ref=e34]:
+                - figure [ref=e35]:
+                  - img [ref=e36]
+                - generic [ref=e38]: Settings
+      - generic [ref=e39]:
+        - button "Sidebar control" [ref=e47] [cursor=pointer]:
+          - img [ref=e49]
+        - main [ref=e59]
+    - generic [ref=e80]:
+      - generic:
+        - img "Background pattern"
+      - generic [ref=e81]:
+        - button "Close banner" [ref=e83] [cursor=pointer]:
+          - img [ref=e85]
+        - generic [ref=e88]:
+          - generic [ref=e89]: Notice
+          - generic [ref=e90]:
+            - paragraph [ref=e91]: We've updated our Terms of Service
+            - paragraph [ref=e92]: Updates define the responsibilities of both you and Supabase in the use of AI.
+          - button "Learn more" [ref=e93] [cursor=pointer]:
+            - generic [ref=e94]: Learn more
+  - alert [ref=e95]

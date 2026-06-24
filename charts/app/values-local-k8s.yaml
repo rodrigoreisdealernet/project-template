@@ -1,0 +1,138 @@
+# Docker Desktop Kubernetes overlay
+#
+# Use this profile to render and dry-run Kubernetes manifests locally before
+# pushing to AKS or EKS. It avoids all cloud-specific dependencies:
+#   - No external container registry credentials (uses locally-built images)
+#   - No ESO/OpenBao stores (use manually-created Kubernetes Secrets from .env)
+#   - ClusterIP services (use kubectl port-forward instead of LoadBalancer)
+#
+# Prerequisites:
+#   1. Enable Kubernetes in Docker Desktop Settings → Kubernetes → Enable Kubernetes
+#   2. Build images locally:
+#        docker build -t frontend:dev-latest -f frontend/Dockerfile .
+#        docker build -t temporal-worker:dev-latest -f temporal/Dockerfile .
+#   3. Create required Kubernetes Secrets from your .env:
+#        kubectl create secret generic frontend-secrets \
+#          --from-literal=VITE_SUPABASE_ANON_KEY=<your-anon-key>
+#        kubectl create secret generic temporal-worker-secrets \
+#          --from-literal=SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+#
+# Usage:
+#   helm upgrade --install myapp charts/app -f charts/app/values-local-k8s.yaml
+#
+# Access services via port-forward after deploy:
+#   kubectl port-forward svc/myapp-app-frontend 3000:80
+#   kubectl port-forward svc/myapp-app-ops-api 3001:8000
+
+# Use locally-built images — no registry prefix required
+imageRegistry: ""
+
+# No pull secrets needed for locally-built images
+imagePullSecrets: []
+
+# ---------------------------------------------------------------------------
+# External Secrets — disabled; create Secrets manually from .env values
+# ---------------------------------------------------------------------------
+externalSecrets:
+  enabled: false
+
+# ---------------------------------------------------------------------------
+# NetworkPolicy — disabled for Docker Desktop (no enforcing CNI by default)
+# ---------------------------------------------------------------------------
+networkPolicy:
+  enabled: false
+
+# ---------------------------------------------------------------------------
+# Frontend
+# ---------------------------------------------------------------------------
+frontend:
+  replicaCount: 1
+  image:
+    repository: "frontend"
+    tag: "dev-latest"
+    digest: ""
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  service:
+    # ClusterIP avoids cloud LoadBalancer provisioning; use kubectl port-forward
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: false
+  # Relaxed resource limits for local dev
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    # Supabase running locally via make up / supabase start
+    supabaseUrl: "http://host.docker.internal:54321"
+    apiUrl: "http://host.docker.internal:54321/functions/v1"
+  secrets:
+    supabaseAnonKey:
+      secretName: "frontend-secrets"
+      key: "VITE_SUPABASE_ANON_KEY"
+
+# ---------------------------------------------------------------------------
+# Temporal Worker
+# ---------------------------------------------------------------------------
+temporalWorker:
+  replicaCount: 1
+  image:
+    repository: "temporal-worker"
+    tag: "dev-latest"
+    digest: ""
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  # Relaxed resource limits for local dev
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  temporal:
+    # Temporal running in-cluster (e.g. via charts/temporal) on Docker Desktop
+    address: "temporal-frontend.temporal.svc.cluster.local:7233"
+    namespace: "default"
+    taskQueue: "local-main"
+  supabase:
+    # Worker reaches Supabase via host bridge
+    url: "http://host.docker.internal:54321"
+  secrets:
+    supabaseServiceRoleKey:
+      secretName: "temporal-worker-secrets"
+      key: "SUPABASE_SERVICE_ROLE_KEY"
+
+# ---------------------------------------------------------------------------
+# Ops API
+# ---------------------------------------------------------------------------
+opsApi:
+  replicaCount: 1
+  image:
+    repository: "temporal-worker"
+    tag: "dev-latest"
+    digest: ""
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  # Relaxed resource limits for local dev
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  temporal:
+    address: "temporal-frontend.temporal.svc.cluster.local:7233"
+    namespace: "default"
+  supabase:
+    url: "http://host.docker.internal:54321"
+  secrets:
+    supabaseServiceRoleKey:
+      secretName: "temporal-worker-secrets"
+      key: "SUPABASE_SERVICE_ROLE_KEY"

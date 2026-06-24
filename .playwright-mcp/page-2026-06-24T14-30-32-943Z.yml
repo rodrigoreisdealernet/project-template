@@ -1,0 +1,160 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e6]:
+        - generic [ref=e7]:
+          - link "Supabase" [ref=e9] [cursor=pointer]:
+            - /url: /project/default
+            - img "Supabase" [ref=e10]
+          - generic [ref=e11]:
+            - generic [ref=e12]:
+              - button "Search..." [ref=e13]:
+                - generic [ref=e14]:
+                  - img [ref=e15]
+                  - paragraph [ref=e18]: Search...
+                - generic [ref=e20]: Ctrl K
+              - button "Help" [ref=e21] [cursor=pointer]:
+                - generic [ref=e22]:
+                  - img [ref=e23]
+                  - generic [ref=e26]: Help
+              - button "Advisor Center" [ref=e28] [cursor=pointer]:
+                - generic [ref=e29]:
+                  - img [ref=e30]
+                  - generic [ref=e32]: Advisor Center
+            - button "Settings" [ref=e33] [cursor=pointer]:
+              - generic [ref=e34]:
+                - figure [ref=e35]:
+                  - img [ref=e36]
+                - generic [ref=e38]: Settings
+      - generic [ref=e39]:
+        - button "Sidebar control" [ref=e47] [cursor=pointer]:
+          - img [ref=e49]
+        - generic [ref=e56]:
+          - generic [ref=e60]:
+            - heading "Database" [level=4] [ref=e62]
+            - menu "Sidebar" [disabled] [ref=e65]:
+              - list [ref=e66]:
+                - generic [ref=e69]:
+                  - generic [ref=e73]: Database Management
+                  - generic [ref=e74]:
+                    - link "Schema Visualizer" [disabled] [ref=e75] [cursor=pointer]:
+                      - /url: /project/undefined/database/schemas
+                      - menuitem "Schema Visualizer" [disabled] [ref=e76]:
+                        - generic [ref=e80]: Schema Visualizer
+                    - link "Tables" [disabled] [ref=e81] [cursor=pointer]:
+                      - /url: /project/undefined/database/tables
+                      - menuitem "Tables" [disabled] [ref=e82]:
+                        - generic [ref=e86]: Tables
+                    - link "Functions" [disabled] [ref=e87] [cursor=pointer]:
+                      - /url: /project/undefined/database/functions
+                      - menuitem "Functions" [disabled] [ref=e88]:
+                        - generic [ref=e92]: Functions
+                    - link "Triggers" [disabled] [ref=e93] [cursor=pointer]:
+                      - /url: /project/undefined/database/triggers/data
+                      - menuitem "Triggers" [disabled] [ref=e94]:
+                        - generic [ref=e98]: Triggers
+                    - link "Enumerated Types" [disabled] [ref=e99] [cursor=pointer]:
+                      - /url: /project/undefined/database/types
+                      - menuitem "Enumerated Types" [disabled] [ref=e100]:
+                        - generic [ref=e104]: Enumerated Types
+                    - link "Extensions" [disabled] [ref=e105] [cursor=pointer]:
+                      - /url: /project/undefined/database/extensions
+                      - menuitem "Extensions" [disabled] [ref=e106]:
+                        - generic [ref=e110]: Extensions
+                    - link "Indexes" [disabled] [ref=e111] [cursor=pointer]:
+                      - /url: /project/undefined/database/indexes
+                      - menuitem "Indexes" [disabled] [ref=e112]:
+                        - generic [ref=e116]: Indexes
+                    - link "Publications" [disabled] [ref=e117] [cursor=pointer]:
+                      - /url: /project/undefined/database/publications
+                      - menuitem "Publications" [disabled] [ref=e118]:
+                        - generic [ref=e122]: Publications
+                - generic [ref=e126]:
+                  - generic [ref=e130]: Configuration
+                  - generic [ref=e131]:
+                    - link "Roles" [disabled] [ref=e132] [cursor=pointer]:
+                      - /url: /project/undefined/database/roles
+                      - menuitem "Roles" [disabled] [ref=e133]:
+                        - generic [ref=e137]: Roles
+                    - link "Policies" [disabled] [ref=e138] [cursor=pointer]:
+                      - /url: /project/undefined/auth/policies
+                      - menuitem "Policies" [disabled] [ref=e139]:
+                        - generic [ref=e141]:
+                          - generic "Policies" [ref=e142]:
+                            - generic [ref=e143]: Policies
+                          - img [ref=e145]
+                    - link "Settings" [disabled] [ref=e148] [cursor=pointer]:
+                      - /url: /project/undefined/database/settings
+                      - menuitem "Settings" [disabled] [ref=e149]:
+                        - generic [ref=e153]: Settings
+                - generic [ref=e157]:
+                  - generic [ref=e161]: Platform
+                  - generic [ref=e162]:
+                    - link "Migrations" [disabled] [ref=e163] [cursor=pointer]:
+                      - /url: /project/undefined/database/migrations
+                      - menuitem "Migrations" [disabled] [ref=e164]:
+                        - generic [ref=e168]: Migrations
+                    - link "Wrappers" [disabled] [ref=e169] [cursor=pointer]:
+                      - /url: /project/undefined/integrations?category=wrapper
+                      - menuitem "Wrappers" [disabled] [ref=e170]:
+                        - generic [ref=e172]:
+                          - generic "Wrappers" [ref=e173]:
+                            - generic [ref=e174]: Wrappers
+                          - img [ref=e176]
+                - generic [ref=e182]:
+                  - generic [ref=e186]: Tools
+                  - generic [ref=e187]:
+                    - link "Security Advisor" [disabled] [ref=e188] [cursor=pointer]:
+                      - /url: /project/undefined/advisors/security
+                      - menuitem "Security Advisor" [disabled] [ref=e189]:
+                        - generic [ref=e191]:
+                          - generic "Security Advisor" [ref=e192]:
+                            - generic [ref=e193]: Security Advisor
+                          - img [ref=e195]
+                    - link "Performance Advisor" [disabled] [ref=e198] [cursor=pointer]:
+                      - /url: /project/undefined/advisors/performance
+                      - menuitem "Performance Advisor" [disabled] [ref=e199]:
+                        - generic [ref=e201]:
+                          - generic "Performance Advisor" [ref=e202]:
+                            - generic [ref=e203]: Performance Advisor
+                          - img [ref=e205]
+                    - link "Query Performance" [disabled] [ref=e208] [cursor=pointer]:
+                      - /url: /project/undefined/observability/query-performance
+                      - menuitem "Query Performance" [disabled] [ref=e209]:
+                        - generic [ref=e211]:
+                          - generic "Query Performance" [ref=e212]:
+                            - generic [ref=e213]: Query Performance
+                          - img [ref=e215]
+          - separator [disabled] [ref=e218]:
+            - img [ref=e220]
+          - main [ref=e229]:
+            - generic [ref=e230]:
+              - heading "Database Tables" [level=1] [ref=e237]
+              - generic [ref=e242]:
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - button [disabled]
+                  - button [ref=e245] [cursor=pointer]:
+                    - img [ref=e247]
+                - generic [ref=e249]:
+                  - group [ref=e250]:
+                    - textbox "Search for a table" [ref=e251]
+                    - group [ref=e252]:
+                      - img [ref=e253]
+                  - button "New table" [ref=e256] [cursor=pointer]:
+                    - img [ref=e258]
+                    - generic [ref=e259]: New table
+    - generic [ref=e267]:
+      - generic:
+        - img "Background pattern"
+      - generic [ref=e268]:
+        - button "Close banner" [ref=e270] [cursor=pointer]:
+          - img [ref=e272]
+        - generic [ref=e275]:
+          - generic [ref=e276]: Notice
+          - generic [ref=e277]:
+            - paragraph [ref=e278]: We've updated our Terms of Service
+            - paragraph [ref=e279]: Updates define the responsibilities of both you and Supabase in the use of AI.
+          - button "Learn more" [ref=e280] [cursor=pointer]:
+            - generic [ref=e281]: Learn more
+  - alert [ref=e282]
