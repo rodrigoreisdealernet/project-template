@@ -2,7 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // Component-level tests for the NFS-e results screen. The pure helpers are covered
 // in nfse-extractions.test.tsx; here we render the actual <NfseExtractionsPage/> and
@@ -272,7 +272,7 @@ describe("NfseExtractionsPage — Scan now", () => {
 
     // It triggered the correct workflow with a bearer token from the session.
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(String(url)).toContain("/trigger-workflow");
     expect(JSON.parse(String(init.body))).toMatchObject({ definition_name: "nfse-ingest" });
     expect((init.headers as Record<string, string>).Authorization).toBe("Bearer tok-123");
