@@ -152,9 +152,13 @@ function EnrollScreen({ onVerified }: { onVerified: () => void }) {
     startedRef.current = true;
     (async () => {
       // Clean up any leftover unverified TOTP factors so re-enrollment does
-      // not fail with "factor already exists".
+      // not fail with "factor already exists". Use `all` (not `totp`): the
+      // supabase-js `totp` list only contains *verified* factors, so a stale
+      // unverified factor from an abandoned enrollment would never be removed.
       const { data: list } = await supabase.auth.mfa.listFactors();
-      const stale = (list?.totp ?? []).filter((f) => f.status !== "verified");
+      const stale = (list?.all ?? []).filter(
+        (f) => f.factor_type === "totp" && f.status !== "verified"
+      );
       for (const f of stale) {
         await supabase.auth.mfa.unenroll({ factorId: f.id });
       }
