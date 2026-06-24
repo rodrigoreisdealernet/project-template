@@ -38,4 +38,37 @@ describe("nfse-ingest definition", () => {
   it("guards persistence on content_filter_blocked == false", () => {
     expect(JSON.stringify(def)).toContain("content_filter_blocked == false");
   });
+
+  it("seed migration JSON matches the definition file (no drift)", () => {
+    const seedSql = readFileSync(
+      join(
+        __dirname,
+        "..",
+        "..",
+        "supabase",
+        "migrations",
+        "20260624160000_seed_nfse_ingest_definition.sql"
+      ),
+      "utf8"
+    );
+    // Extract the JSONB literal embedded between the first `$$` and `$$::jsonb`.
+    const start = seedSql.indexOf("$$");
+    const end = seedSql.indexOf("$$::jsonb");
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+    const seedJson = seedSql.slice(start + 2, end);
+    const seedDef = JSON.parse(seedJson) as Record<string, unknown>;
+    expect(seedDef).toEqual(def);
+  });
+
+  it("schedule bootstrap derives the definition from the file (no embedded copy)", () => {
+    const bootstrap = readFileSync(
+      join(__dirname, "..", "..", "scripts", "bootstrap-nfse-schedule.ts"),
+      "utf8"
+    );
+    // Reads the canonical definition from the .json file...
+    expect(bootstrap).toContain("nfse-ingest.json");
+    // ...and does NOT embed its own copy of the workflow literal.
+    expect(bootstrap).not.toContain('"steps"');
+  });
 });

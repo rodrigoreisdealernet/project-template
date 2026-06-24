@@ -4,7 +4,7 @@
 - **Project Type**: Brownfield
 - **Feature**: Automated NFS-e ingestion & field extraction (Temporal workflow + Azure gpt-5.4 + Supabase + React UI)
 - **Start Date**: 2026-06-24T15:39:19Z
-- **Current Stage**: CONSTRUCTION - Build and Test complete (awaiting approval → Operations/placeholder). Feature implementation DONE.
+- **Current Stage**: CONSTRUCTION - Build and Test complete + post-construction improvements applied (3 additive enhancements, unit-tested). Feature implementation DONE.
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -52,6 +52,12 @@
 - [ ] Infrastructure Design — SKIP
 - [x] Code Generation — Part 1 (plan) + Part 2 (generation) complete (awaiting approval) · code-summary at aidlc-docs/construction/nfse-ingestion/code/
 - [x] Build and Test — Instructions generated; static verification PASS (typecheck + DSL validation). Dynamic suites + live e2e pending dev env. (awaiting approval)
+
+### 🟢 POST-CONSTRUCTION IMPROVEMENTS — unit: nfse-ingestion (additive, 2026-06-24)
+- [x] #1 Definition drift guard — seed re-synced to the .json (single source of truth) + parity tests · Jest 8/8 · mitigates ADR-0152 "Negative"
+- [x] #2 Bounded dedup — `source_url=in.(...)` membership read (chunked) replaces full-table scan · Jest 4/4
+- [x] #3 Low-confidence review path (UI) — pending-review filter + counter + link to original PDF · vitest 8/8 + tsc clean
+- Implemented via 3 parallel sub-agents over disjoint files; live dashboard at reports/nfse-improvements/dashboard.html. Not committed.
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations — PLACEHOLDER

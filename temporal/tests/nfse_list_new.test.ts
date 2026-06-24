@@ -59,4 +59,49 @@ describe("nfse_list_new", () => {
     expect(result.new_count).toBe(3);
     expect(result.skipped_count).toBe(0);
   });
+
+  it("reads existing source_urls via a bounded membership query (source_url=in.)", async () => {
+    const requested: string[] = [];
+    global.fetch = (async (url: string) => {
+      const u = String(url);
+      requested.push(u);
+      if (u.includes("/rest/v1/workflow_document_extractions")) {
+        return new Response(JSON.stringify([]), { status: 200 });
+      }
+      return new Response(JSON.stringify({ invoices: INVOICES }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await nfse_list_new({});
+
+    const dbReads = requested.filter((u) =>
+      u.includes("/rest/v1/workflow_document_extractions"),
+    );
+    expect(dbReads.length).toBeGreaterThan(0);
+    // Bounded membership read, not an unfiltered/limit-offset full-table scan.
+    for (const u of dbReads) {
+      expect(u).toContain("source_url=in.");
+      expect(u).not.toContain("limit=");
+      expect(u).not.toContain("offset=");
+    }
+  });
+
+  it("skips the DB read entirely when the source returns zero invoices", async () => {
+    const requested: string[] = [];
+    global.fetch = (async (url: string) => {
+      const u = String(url);
+      requested.push(u);
+      if (u.includes("/rest/v1/workflow_document_extractions")) {
+        return new Response(JSON.stringify([]), { status: 200 });
+      }
+      return new Response(JSON.stringify({ invoices: [] }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const result = await nfse_list_new({});
+
+    expect(result.new_count).toBe(0);
+    expect(result.total).toBe(0);
+    expect(
+      requested.some((u) => u.includes("/rest/v1/workflow_document_extractions")),
+    ).toBe(false);
+  });
 });

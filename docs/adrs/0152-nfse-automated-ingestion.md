@@ -78,7 +78,13 @@ the model** (the Day 2 ADR step), plus **how to deduplicate** already-processed 
 **Negative:**
 - The active definition lives in `workflow_definitions` (seed/migration) **and** as a
   file; the two must be kept in sync. The Schedule also embeds the definition JSON.
-- A 15s Schedule adds constant (cheap) source-list + DB-read traffic.
+  *(Mitigated 2026-06-24 — improvement #1: the file is the single source of truth, the
+  seed now mirrors it verbatim, and `temporal/tests/nfse-ingest.definition.test.ts`
+  fails on any drift between file ↔ seed and if the bootstrap re-embeds a copy.)*
+- A 15s Schedule adds constant (cheap) source-list + DB-read traffic. *(Reduced
+  2026-06-24 — improvement #2: dedup is now a bounded `source_url=in.(...)` membership
+  read over only the current source list, not a full-table scan, so the per-cycle DB
+  cost no longer grows with the number of already-processed invoices.)*
 - LLM extraction is non-deterministic; correctness depends on prompt + schema, not on
   unit tests.
 
@@ -109,3 +115,22 @@ the model** (the Day 2 ADR step), plus **how to deduplicate** already-processed 
 - `mock-nfse-api/` — POC source service.
 - ADR-0001 (Temporal DSL), ADR-0006 (Temporal orchestration), ADR-0008 (LLM adapter),
   ADR-0023 (authenticated write path), ADR-0024 (additive migrations).
+
+## Post-Construction Improvements (2026-06-24)
+
+Three additive, unit-tested enhancements applied after construction (no behavior change
+to the happy path; verified by unit tests, nothing committed):
+
+1. **Definition single-source-of-truth + drift guard** — the seed migration's embedded
+   JSON now mirrors `temporal/definitions/nfse-ingest.json` verbatim, and
+   `temporal/tests/nfse-ingest.definition.test.ts` asserts seed↔file deep-equality and
+   that the Schedule bootstrap derives from the file (no re-embedded copy). Addresses the
+   "Negative" above.
+2. **Bounded dedup** — `temporal/src/activities/nfse_list_new.ts` now reads existing
+   `source_url`s via a chunked `source_url=in.(...)` membership query over the current
+   source list instead of scanning the whole `workflow_document_extractions` table each
+   cycle; an empty source list skips the DB read entirely.
+3. **Low-confidence review path (UI)** — `frontend/src/routes/nfse/index.tsx` adds a
+   pending-review counter, a "show only pending review" filter, and a link to the original
+   document (`source_url`), surfacing low-confidence extractions for human verification
+   without re-introducing a confidence gate on the write path.

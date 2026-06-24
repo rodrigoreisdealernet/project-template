@@ -60,31 +60,43 @@
     </div>
     <div class="meta">
       Gerado: <strong>2026-06-24</strong><br/>
-      Status geral: <strong id="overall" style="color:var(--warn)">✅ Concluído · 2 ressalvas</strong><br/>
-      Agentes: <strong>9 / 9 concluídos</strong>
+      Status geral: <strong id="overall" style="color:var(--pass)">✅ Shipped · PR #22</strong><br/>
+      Agentes: <strong>9 / 9</strong> · WARN <strong>resolvidos</strong>
     </div>
   </header>
 
+  <div class="card pass" style="margin-bottom:20px">
+    <div class="row"><h3>🚀 Ship real — verificado ao vivo</h3><span class="badge pass">✓ E2E OK</span></div>
+    <div class="scope">Executado contra a stack viva (Docker + Supabase + Azure gpt-5.4 reais).</div>
+    <ul class="findings">
+      <li class="ok"><strong>5/5 NFS-e extraídas</strong> e persistidas: 402→R$245,05 · 14521→R$6 · 2551→R$500 · 4861→R$827,50 · 20267966→R$75 (incl. a da DEALERNET).</li>
+      <li class="ok"><strong>Dedup</strong>: re-disparo manteve 5 linhas (zero duplicatas).</li>
+      <li class="ok"><strong>Temporal Schedule (15s)</strong>: apaguei 1 nota → reingerida sozinha em ~16s.</li>
+      <li class="ok"><strong>PR aberta</strong>: <code>rodrigoreisdealernet/project-template#22</code> (36 arquivos; sem segredos — chave só no .env gitignored).</li>
+      <li class="w"><strong>Fix descoberto no run ao vivo</strong>: Azure gpt-5.4 (reasoning) rejeita <code>max_tokens</code> e o pi-ai exigia chave do provider "openai". Corrigido no <code>llm_agent</code>: <code>compat.maxTokensField=max_completion_tokens</code> + backfill de <code>OPENAI_API_KEY</code>. (auth real continua via header <code>api-key</code>.)</li>
+      <li>Frontend: <code>vite build</code> compila e <code>routeTree.gen.ts</code> tem <code>/nfse</code>; rebuild do container do frontend bloqueado por TLS do mirror Alpine (ambiente, não código).</li>
+    </ul>
+  </div>
+
   <div class="summary">
-    <span class="pill"><span class="dot" style="background:var(--pass)"></span>PASS <b>7</b></span>
-    <span class="pill"><span class="dot" style="background:var(--warn)"></span>WARN <b>2</b></span>
+    <span class="pill"><span class="dot" style="background:var(--pass)"></span>PASS <b>9</b></span>
+    <span class="pill"><span class="dot" style="background:var(--warn)"></span>WARN <b>0</b> <span style="color:var(--muted);font-weight:400">(2 resolvidos)</span></span>
     <span class="pill"><span class="dot" style="background:var(--fail)"></span>FAIL <b>0</b></span>
-    <span class="bar" title="7 PASS / 2 WARN / 0 FAIL">
-      <i style="width:77.8%;background:var(--pass)"></i><i style="width:22.2%;background:var(--warn)"></i>
+    <span class="bar" title="9 PASS / 0 WARN / 0 FAIL">
+      <i style="width:100%;background:var(--pass)"></i>
     </span>
   </div>
 
   <div class="grid">
 
     <div class="card pass" id="A1">
-      <div class="row"><h3>Worker activity</h3><span class="badge warn">⚠ WARN</span></div>
+      <div class="row"><h3>Worker activity</h3><span class="badge pass">✓ PASS · fix aplicado</span></div>
       <div class="aid">Agent 01 · nfse_list_new.ts · config.ts · worker.ts</div>
-      <div class="vsum">Activity funcional e bem registrada; ressalva de escala na leitura de dedup.</div>
+      <div class="vsum">Activity funcional; ressalvas WARN corrigidas.</div>
       <ul class="findings">
-        <li class="ok">Config <code>nfseSourceApiUrl</code>, headers service-role (apikey+Bearer) e lógica de dedup corretos.</li>
-        <li class="w">Leitura de dedup <code>select=source_url</code> sem <code>limit</code> → sujeita ao max-rows do PostgREST (~1000). OK p/ POC; paginar p/ escala.</li>
-        <li class="w"><code>fetch</code> da fonte sem timeout/abort → fonte travada bloqueia até o start-to-close.</li>
-        <li>Menor: sem guarda de parse em <code>res.json()</code>; <code>id</code>/<code>filename</code> não validados.</li>
+        <li class="ok">Config <code>nfseSourceApiUrl</code>, headers service-role e lógica de dedup corretos.</li>
+        <li class="ok"><strong>Fix:</strong> leitura de dedup agora <strong>paginada</strong> (limit/offset) — não mais limitada pelo max-rows do PostgREST.</li>
+        <li class="ok"><strong>Fix:</strong> ambos os <code>fetch</code> com <strong>timeout/abort</strong> (20s) + guarda de parse JSON.</li>
       </ul>
     </div>
 
@@ -124,15 +136,15 @@
       </ul>
     </div>
 
-    <div class="card warn" id="A5">
-      <div class="row"><h3>Frontend</h3><span class="badge warn">⚠ WARN</span></div>
+    <div class="card pass" id="A5">
+      <div class="row"><h3>Frontend</h3><span class="badge pass">✓ PASS · fix aplicado</span></div>
       <div class="aid">Agent 05 · routes/nfse · definitions · __root</div>
-      <div class="vsum">Implementação correta e alinhada ao padrão existente; falta regenerar a route tree.</div>
+      <div class="vsum">Implementação correta e alinhada ao padrão existente; route tree regenerada.</div>
       <ul class="findings">
-        <li class="w"><code>routeTree.gen.ts</code> não tem <code>/nfse</code> — regenera no <code>dev</code>/<code>build</code> (plugin TanStack Vite). Até lá <code>&lt;Link to="/nfse"&gt;</code> não typecheck. Sem edição manual.</li>
+        <li class="ok"><strong>Fix:</strong> <code>routeTree.gen.ts</code> regenerada — inclui <code>/nfse</code>; <code>vite build</code> compila a rota nova.</li>
         <li class="ok">Select supabase usa colunas reais; useQuery/invalidate corretos; QueryClientProvider presente.</li>
         <li class="ok">Scan-now segue o padrão do <code>trigger.tsx</code> (bearer, definition_name); sidebar/badge OK.</li>
-        <li>Menor: UI diz “a cada 15s” mas o poll é 5s (cosmético).</li>
+        <li>Rebuild do container do frontend bloqueado localmente por TLS do mirror Alpine (ambiente).</li>
       </ul>
     </div>
 

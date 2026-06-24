@@ -149,3 +149,23 @@ Complete audit trail of user inputs and AI responses. Append-only.
 **Context**: Post-AIDLC verification fan-out.
 
 ---
+
+## Post-Construction Improvements — Analysis Request
+**Timestamp**: 2026-06-24T18:05:49Z
+**User Input**: "Analise a feature que está sendo implementada usndo aidlc e proponha 3 melhorias"
+**AI Response**: Analyzed the nfse-ingestion feature (ADR-0152, DSL definition, nfse_list_new activity, functional design, frontend route). Proposed 3 improvements: (#1) make temporal/definitions/nfse-ingest.json the single source of truth and guard against drift with a parity test (the ADR's own "Negative"); (#2) replace the full-table dedup read with a bounded membership query (source_url=in.(...)); (#3) add a low-confidence review path in the UI (filter, counter, link to original PDF).
+**Context**: Post-construction enhancement analysis for unit nfse-ingestion.
+
+---
+
+## Post-Construction Improvements — Implementation (parallel sub-agents)
+**Timestamp**: 2026-06-24T18:05:49Z
+**User Input**: "Implementar as 3 usando subagents, crie um HTML onde cada agente irá atualizar o status da sua feature"
+**AI Response**: Implemented all 3 improvements via 3 parallel general-purpose sub-agents over disjoint file sets, with a live status dashboard at reports/nfse-improvements/dashboard.html (reads agent-1/2/3.js, auto-refresh 1.5s).
+  - #1 Drift guard (agent 1): re-synced the seed migration's embedded JSON to mirror temporal/definitions/nfse-ingest.json (the `description` had drifted) and added 2 guard tests to temporal/tests/nfse-ingest.definition.test.ts (seed==file deep-equal; bootstrap derives from file, no embedded copy). Jest 8/8 pass.
+  - #2 Bounded dedup (agent 2): replaced the full-table pager in temporal/src/activities/nfse_list_new.ts with a membership read (source_url=in.(...), chunked at CHUNK_SIZE=100, encoded; empty source list skips the DB). Updated temporal/tests/nfse_list_new.test.ts (+bounded-query assertion, +empty-source no-DB-call). Jest 4/4 pass.
+  - #3 Review path UI (agent 3): added exported helpers needsReview/countPendingReview, a "N pendente(s) de revisão" chip, a "Mostrar só pendentes de revisão" filter toggle, and an "Original" column linking to source_url (target=_blank rel=noopener) in frontend/src/routes/nfse/index.tsx; added unit tests in nfse-extractions.test.tsx. vitest 8/8 pass + tsc --noEmit clean.
+  Scopes were disjoint (no file conflicts). Each sub-agent ran `npm install` to repair/create node_modules (pre-existing env quirk). Nothing committed. Updated aidlc-state.md and ADR-0152 (drift "Negative" now mitigated).
+**Context**: CONSTRUCTION — additive post-construction improvements to unit nfse-ingestion; no new AIDLC stage (changes within existing component boundaries, verified by unit tests).
+
+---

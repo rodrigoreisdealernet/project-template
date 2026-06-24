@@ -12,6 +12,12 @@
  * The source API contract (mock locally, real in prod):
  *   GET {NFSE_SOURCE_API_URL}/invoices -> { invoices: [{ id, filename, content_url }] }
  * Dedup key = content_url (== workflow_document_extractions.source_url, UNIQUE).
+ *
+ * Dedup is a BOUNDED MEMBERSHIP READ (not a full-table scan): we fetch the small
+ * source list first, then ask the DB only about the source_urls in that list via
+ * a PostgREST `source_url=in.(...)` filter (chunked to stay under URL limits).
+ * The workflow runs every ~15s, so the steady-state read cost is proportional to
+ * the source list size, NOT the total size of workflow_document_extractions.
  */
 import { log } from "@temporalio/activity";
 import {
@@ -62,10 +68,9 @@ function assertSupabaseConfig(): void {
 }
 
 const FETCH_TIMEOUT_MS = 20_000;
-// Page size for reading existing source_urls. PostgREST caps responses at its
-// configured max-rows (often 1000); we page explicitly so dedup stays correct
-// beyond that cap (review finding A1).
-const EXISTING_PAGE_SIZE = 1000;
+// Max number of source_urls per membership (`in.(...)`) request. Chunking keeps
+// the request URL under server/proxy length limits as the source list grows.
+const CHUNK_SIZE = 100;
 
 async function fetchWithTimeout(url: string, init: RequestInit = {}): Promise<Response> {
   const controller = new AbortController();
@@ -99,18 +104,31 @@ async function fetchSourceInvoices(baseUrl: string): Promise<NfseInvoiceRef[]> {
   return invoices.filter((i) => i && typeof i.content_url === "string" && i.content_url.length > 0);
 }
 
-async function fetchExistingSourceUrls(): Promise<Set<string>> {
-  // Service-role read of already-extracted invoices (source_url is the dedup key).
-  // Paginated with limit/offset so we are not silently capped by PostgREST max-rows.
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+async function fetchExistingSourceUrls(urls: string[]): Promise<Set<string>> {
+  // Service-role membership read: ask only about the source_urls we are about to
+  // consider (the current source list), instead of scanning the whole table.
+  const existing = new Set<string>();
+  if (urls.length === 0) return existing; // never emit an empty in.() — it is invalid.
+
   const headers = {
     apikey: config.supabaseServiceKey,
     Authorization: `Bearer ${config.supabaseServiceKey}`,
   };
-  const existing = new Set<string>();
-  for (let offset = 0; ; offset += EXISTING_PAGE_SIZE) {
+  for (const batch of chunk(urls, CHUNK_SIZE)) {
+    // Build `in.("url1","url2",...)`: double-quote each value (escaping any " inside)
+    // and join with commas, then encode the whole filter value so reserved chars in
+    // the URLs travel safely over the query string.
+    const list = batch.map((u) => `"${u.replace(/"/g, '\\"')}"`).join(",");
+    const filter = encodeURIComponent(`in.(${list})`);
     const url =
       `${config.supabaseUrl}/rest/v1/workflow_document_extractions` +
-      `?select=source_url&order=source_url.asc&limit=${EXISTING_PAGE_SIZE}&offset=${offset}`;
+      `?select=source_url&source_url=${filter}`;
     const res = await fetchWithTimeout(url, { headers });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
@@ -120,7 +138,6 @@ async function fetchExistingSourceUrls(): Promise<Set<string>> {
     for (const r of rows) {
       if (typeof r.source_url === "string") existing.add(r.source_url);
     }
-    if (rows.length < EXISTING_PAGE_SIZE) break;
   }
   return existing;
 }
@@ -129,10 +146,10 @@ export async function nfse_list_new(args: NfseListNewArgs = {}): Promise<NfseLis
   assertSupabaseConfig();
   const baseUrl = args.source_api_url ?? config.nfseSourceApiUrl;
 
-  const [all, existing] = await Promise.all([
-    fetchSourceInvoices(baseUrl),
-    fetchExistingSourceUrls(),
-  ]);
+  // Fetch the (small) source list first; dedup is then a bounded membership read
+  // over exactly those content_urls (no full-table scan).
+  const all = await fetchSourceInvoices(baseUrl);
+  const existing = await fetchExistingSourceUrls(all.map((inv) => inv.content_url));
 
   const invoices = all.filter((inv) => !existing.has(inv.content_url));
   const run_at = new Date().toISOString();

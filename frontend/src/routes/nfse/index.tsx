@@ -15,6 +15,16 @@ export function isLowConfidence(confidence: unknown): boolean {
   return typeof confidence === "number" && confidence < LOW_CONFIDENCE_THRESHOLD;
 }
 
+// A row needs a human's review when its confidence is a number below the threshold.
+export function needsReview(row: { confidence: number | null }): boolean {
+  return isLowConfidence(row.confidence);
+}
+
+// How many rows still need review (low confidence).
+export function countPendingReview(rows: ReadonlyArray<{ confidence: number | null }>): number {
+  return rows.reduce((total, row) => (needsReview(row) ? total + 1 : total), 0);
+}
+
 interface ExtractedNfse {
   numero_nota?: string | null;
   prestador_razao_social?: string | null;
@@ -64,6 +74,11 @@ function NfseExtractionsPage() {
   const [scanning, setScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [reviewOnly, setReviewOnly] = useState(false);
+
+  const allRows = rows ?? [];
+  const pendingReviewCount = countPendingReview(allRows);
+  const visibleRows = reviewOnly ? allRows.filter(needsReview) : allRows;
 
   async function onScanNow() {
     setScanning(true);
@@ -102,6 +117,14 @@ function NfseExtractionsPage() {
             Notas processadas automaticamente pelo workflow <code>nfse-ingest</code>. A varredura roda
             sozinha a cada 15s; use “Scan now” para forçar agora.
           </p>
+          {pendingReviewCount > 0 ? (
+            <span
+              data-testid="nfse-review-count"
+              className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+            >
+              {pendingReviewCount} pendente(s) de revisão
+            </span>
+          ) : null}
         </div>
         <button
           type="button"
@@ -125,14 +148,32 @@ function NfseExtractionsPage() {
         </p>
       ) : null}
 
+      <label
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground select-none"
+        data-testid="nfse-review-filter-label"
+      >
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded border-input"
+          data-testid="nfse-review-filter"
+          checked={reviewOnly}
+          onChange={(e) => setReviewOnly(e.target.checked)}
+        />
+        Mostrar só pendentes de revisão
+      </label>
+
       <div className="rounded-xl border bg-card overflow-hidden">
         {isLoading ? (
           <p className="p-6 text-sm text-muted-foreground">Carregando…</p>
         ) : error ? (
           <p className="p-6 text-sm text-red-600">Erro ao carregar: {(error as Error).message}</p>
-        ) : !rows || rows.length === 0 ? (
+        ) : allRows.length === 0 ? (
           <p className="p-6 text-sm text-muted-foreground" data-testid="nfse-empty">
             Nenhuma nota processada ainda — aguarde a próxima varredura ou clique em “Scan now”.
+          </p>
+        ) : visibleRows.length === 0 ? (
+          <p className="p-6 text-sm text-muted-foreground" data-testid="nfse-review-empty">
+            Nenhuma nota pendente de revisão.
           </p>
         ) : (
           <table className="w-full text-sm" data-testid="nfse-table">
@@ -144,10 +185,11 @@ function NfseExtractionsPage() {
                 <th className="px-4 py-2 font-medium text-right">Valor total</th>
                 <th className="px-4 py-2 font-medium">Emissão</th>
                 <th className="px-4 py-2 font-medium">Confiança</th>
+                <th className="px-4 py-2 font-medium">Original</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {visibleRows.map((row) => {
                 const f = row.extracted_fields ?? {};
                 const low = isLowConfidence(row.confidence);
                 return (
@@ -171,6 +213,21 @@ function NfseExtractionsPage() {
                         >
                           {(row.confidence * 100).toFixed(0)}%{low ? " · baixa" : ""}
                         </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {row.source_url ? (
+                        <a
+                          href={row.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline underline-offset-2 hover:no-underline"
+                          data-testid="nfse-open-source"
+                        >
+                          Ver PDF
+                        </a>
+                      ) : (
+                        "—"
                       )}
                     </td>
                   </tr>
