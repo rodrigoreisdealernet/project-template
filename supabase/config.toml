@@ -164,9 +164,14 @@ anonymous_users = 30
 # Number of sessions that can be refreshed in a 5 minute interval per IP address.
 token_refresh = 150
 # Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
-sign_in_sign_ups = 30
-# Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
-token_verifications = 30
+# Raised for local dev: the Playwright E2E suite re-authenticates (incl. MFA) once
+# per test — ~80+ sign-ins over a single run — which trips the stock limit of 30
+# and surfaces as a stuck/disabled MFA submit (HTTP 429). Lower this back to 30
+# for any internet-facing deployment.
+sign_in_sign_ups = 1000
+# Number of OTP / Magic link / MFA verifications that can be made in a 5 minute interval per IP address.
+# Raised for local dev for the same reason as sign_in_sign_ups above.
+token_verifications = 1000
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
 web3 = 30
 
