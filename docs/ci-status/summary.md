@@ -28,6 +28,7 @@ Generated: 2026-06-24 14:39Z
 
 | Workflow | Last run | Outcome | Metrics |
 |---|---|---|---|
+| `validate-ontology` | 2026-06-24 14:39Z | ✅ passed | failed_jobs=0, skipped_jobs=0 |
 
 ## Security & audits
 
@@ -41,7 +42,7 @@ Generated: 2026-06-24 14:39Z
 | `pipeline-daily` | — | — |
 | `monitor-actions` | — | — |
 | `validate-dsl-definitions` | — | — |
-| `validate-ontology` | — | — |
+| `validate-ontology` | 2026-06-24 14:39Z | ✅ passed |
 
 ## Unstable tests
 
