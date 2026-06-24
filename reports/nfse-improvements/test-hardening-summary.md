@@ -5,11 +5,15 @@ Date: 2026-06-24
 
 ## How it's tested
 
-The NFS-e automated ingestion feature is covered at three layers, all with mocked
-dependencies (no live Temporal / Supabase / Azure required):
+The NFS-e automated ingestion feature is covered across the full pyramid — unit,
+integration, and end-to-end. The unit/integration layers run with mocked
+dependencies (no live Temporal / Supabase / Azure required); the E2E layer drives
+the real route in a browser with only the backend boundaries mocked at the network
+edge.
 
 | Layer | File | What it proves |
 |-------|------|----------------|
+| E2E (browser) | `frontend/e2e/nfse-ingestion.spec.ts` | Drives the real `/nfse` route through AuthGate→MfaGate + React Query: table render with BRL + confidence badges, out-of-range confidence flagged (not green), `javascript:` source refused as a link (stored-XSS guard), review-filter narrowing, `Scan now` posting `definition_name: nfse-ingest`, and the empty state. Mocks only the Supabase read + `trigger-workflow` Edge Function (same style as `experience.spec.ts`). Runs against a deployed env; skips when `E2E_AUTH_EMAIL` is unset, like the rest of the suite. |
 | Workflow orchestration | `temporal/tests/nfse-ingest.integration.test.ts` | Runs the real DSL interpreter in `TestWorkflowEnvironment` with every activity stubbed: happy path (extract + persist per invoice), the `content_filter_blocked` persistence guard, per-invoice `try_catch` resilience, empty listing no-op, low-confidence still persists, and `llm_agent` arg fidelity (model/temperature/schema/prompt). |
 | Dedup activity | `temporal/tests/nfse_list_new.test.ts` | Read-side dedup, bounded membership read (`source_url=in.(...)`), chunking >100, plus error paths (source non-2xx, non-JSON, DB read failure, missing service key, malformed rows) and the two red-team regressions below. |
 | Persistence contract | `temporal/tests/supabase_query.test.ts` | The exact NFS-e upsert: `on_conflict=source_url`, `Prefer: resolution=merge-duplicates`, body shape (`source_url`/`extracted_fields`/`confidence`/`extracted_at`), and rejection of an empty-match upsert. |
@@ -54,6 +58,10 @@ user-protective mitigation.
 - **NFS-e temporal tests:** 32 passing (`nfse_list_new`, `nfse-ingest.definition`,
   `nfse-ingest.integration`, `supabase_query`).
 - **NFS-e frontend tests:** 24 passing (`nfse-extractions` + `nfse-extractions-page`).
+- **NFS-e E2E (`nfse-ingestion.spec.ts`):** 6 browser tests, compiled and discovered
+  by Playwright (`playwright test nfse-ingestion --list`). They run against a deployed
+  frontend and skip without `E2E_AUTH_EMAIL` — the same contract as the 11 existing
+  e2e specs (the suite targets a real environment, not a local build).
 
 Full-suite runs surface pre-existing failures **unrelated to NFS-e** (verified by
 re-running with these changes stashed — identical failures on baseline):
