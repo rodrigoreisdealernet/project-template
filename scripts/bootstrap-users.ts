@@ -68,6 +68,10 @@ interface DevUser {
   description: string;
 }
 
+// NOTE: the `role` values below MUST match the role vocabulary the app and the
+// RLS policies key off (`admin`, `editor`, `reviewer`, `read_only`). Using a
+// near-miss like `readonly` (no underscore) silently grants write affordances
+// because the app never recognises it as the read-only role.
 const DEV_USERS: DevUser[] = [
   {
     email: 'admin@dev.local',
@@ -82,9 +86,15 @@ const DEV_USERS: DevUser[] = [
     description: 'Standard authenticated user — use for day-to-day testing',
   },
   {
+    email: 'reviewer@dev.local',
+    password: 'Reviewer1234!',
+    role: 'reviewer',
+    description: 'Reviewer — can approve/reject workflow-definition promotions',
+  },
+  {
     email: 'readonly@dev.local',
     password: 'Readonly1234!',
-    role: 'readonly',
+    role: 'read_only',
     description: 'Read-only user — use to test permission boundaries',
   },
 ];
@@ -92,25 +102,6 @@ const DEV_USERS: DevUser[] = [
 // ---------------------------------------------------------------------------
 // TOTP helpers (RFC 6238, no external deps)
 // ---------------------------------------------------------------------------
-
-function generateTotpSecret(): string {
-  // 20-byte random secret, base32-encoded
-  const bytes = crypto.randomBytes(20);
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let result = '';
-  let buffer = 0;
-  let bitsLeft = 0;
-  for (const byte of bytes) {
-    buffer = (buffer << 8) | byte;
-    bitsLeft += 8;
-    while (bitsLeft >= 5) {
-      bitsLeft -= 5;
-      result += alphabet[(buffer >> bitsLeft) & 0x1f];
-    }
-  }
-  if (bitsLeft > 0) result += alphabet[(buffer << (5 - bitsLeft)) & 0x1f];
-  return result;
-}
 
 function totpUri(secret: string, email: string): string {
   return `otpauth://totp/10xStack%3A${encodeURIComponent(email)}?secret=${secret}&issuer=10xStack&algorithm=SHA1&digits=6&period=30`;
@@ -195,27 +186,82 @@ async function createUser(user: DevUser): Promise<string> {
   return (data as { id: string }).id;
 }
 
-async function enrollTotp(userId: string, secret: string, code: string): Promise<void> {
-  // Use the admin API to directly insert a confirmed TOTP factor
-  // (avoids needing the user to be signed in)
-  const { status, data } = await adminFetch(`/users/${userId}`, 'PUT', {
-    factors: [
-      {
-        friendly_name: 'authenticator',
-        factor_type: 'totp',
-        status: 'verified',
-        secret,
-      },
-    ],
+// Non-admin GoTrue call (acts in the signed-in user's context via their bearer
+// token). The service-role key is accepted as the apikey by the local stack.
+async function authFetch(
+  path: string,
+  method: string,
+  accessToken: string,
+  body?: unknown,
+): Promise<{ status: number; data: unknown }> {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1${path}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  // Factor enrollment via admin PUT is supported in Supabase CLI >= 2.x
-  // If the API returns 422 (unsupported), we still print the URI — the user
-  // can enroll on first sign-in.
-  if (status !== 200 && status !== 201) {
-    // Non-fatal: user is created, TOTP enrollment happens on first login
-    void data;
-    void code;
+  const text = await res.text();
+  let data: unknown;
+  try { data = JSON.parse(text); } catch { data = text; }
+  return { status: res.status, data };
+}
+
+async function signInPassword(email: string, password: string): Promise<string> {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SERVICE_ROLE_KEY,
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = (await res.json()) as { access_token?: string };
+  if (!res.ok || !data.access_token) {
+    throw new Error(`sign-in failed for ${email}: HTTP ${res.status}`);
   }
+  return data.access_token;
+}
+
+/**
+ * Enroll AND verify a TOTP factor for a user via the standard GoTrue flow
+ * (enroll -> challenge -> verify). Returns the server-generated Base32 secret
+ * so the caller can print a working TOTP URI. This is the reliable path: the
+ * admin PUT `factors` shortcut is silently rejected (422) by the local stack,
+ * which left every dev user without an enrolled factor and broke login under
+ * the enforced `require_aal2` policy.
+ */
+async function enrollVerifiedTotp(user: DevUser): Promise<string> {
+  const accessToken = await signInPassword(user.email, user.password);
+
+  const enroll = await authFetch('/factors', 'POST', accessToken, {
+    factor_type: 'totp',
+    friendly_name: 'authenticator',
+  });
+  if (enroll.status !== 200 && enroll.status !== 201) {
+    throw new Error(`TOTP enroll failed for ${user.email}: ${JSON.stringify(enroll.data)}`);
+  }
+  const enrollData = enroll.data as { id: string; totp: { secret: string } };
+  const factorId = enrollData.id;
+  const secret = enrollData.totp.secret;
+
+  const challenge = await authFetch(`/factors/${factorId}/challenge`, 'POST', accessToken);
+  const challengeId = (challenge.data as { id?: string }).id;
+  if (!challengeId) {
+    throw new Error(`TOTP challenge failed for ${user.email}: ${JSON.stringify(challenge.data)}`);
+  }
+
+  const verify = await authFetch(`/factors/${factorId}/verify`, 'POST', accessToken, {
+    challenge_id: challengeId,
+    code: totpCode(secret),
+  });
+  if (verify.status !== 200 && verify.status !== 201) {
+    throw new Error(`TOTP verify failed for ${user.email}: ${JSON.stringify(verify.data)}`);
+  }
+
+  return secret;
 }
 
 // ---------------------------------------------------------------------------
@@ -244,12 +290,11 @@ async function main(): Promise<void> {
     }
   }
 
-  // Create dev users
+  // Create dev users and enroll a verified TOTP factor for each.
   const results: Array<{ user: DevUser; id: string; secret: string }> = [];
   for (const user of DEV_USERS) {
     const id = await createUser(user);
-    const secret = generateTotpSecret();
-    await enrollTotp(id, secret, totpCode(secret));
+    const secret = await enrollVerifiedTotp(user);
     results.push({ user, id, secret });
     console.log(`  created: ${user.email}`);
   }

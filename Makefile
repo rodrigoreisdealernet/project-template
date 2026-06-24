@@ -12,7 +12,7 @@ endif
 
 COMPOSE_CMD=docker compose $(foreach file,$(COMPOSE_FILES),-f $(file))
 
-.PHONY: up up-https down reset logs logs-temporal logs-frontend supabase-status test-temporal setup lint certs bootstrap-users verify nfse-schedule
+.PHONY: up up-https down reset logs logs-temporal logs-frontend supabase-status test-temporal setup lint certs bootstrap-users verify nfse-schedule seed-demo
 
 # Install git hooks and dev tooling. Run once after cloning.
 setup:
@@ -82,6 +82,7 @@ reset:
 	$(COMPOSE_CMD) down -v
 	-supabase stop --no-backup
 	$(MAKE) up
+	-$(MAKE) bootstrap-users
 
 logs:
 	$(COMPOSE_CMD) logs -f
@@ -105,6 +106,13 @@ test-temporal:
 bootstrap-users:
 	@command -v npx >/dev/null 2>&1 || (echo "npx not found — install Node.js" && exit 1)
 	cd temporal && npx ts-node --project tsconfig.json ../scripts/bootstrap-users.ts
+
+# Seed the LOCAL dev database with demo entities + workflow definitions so the
+# Playwright E2E specs have data to assert against (template ships an empty
+# workspace). Idempotent and local-only. Requires supabase running (`make up`).
+seed-demo:
+	@command -v npx >/dev/null 2>&1 || (echo "npx not found — install Node.js" && exit 1)
+	cd temporal && NODE_PATH="$$(pwd)/node_modules" npx ts-node --transpile-only --project tsconfig.json ../scripts/seed-demo-data.ts
 
 # Verify the running stack is actually up and services are talking: probes every
 # service over the wire and exercises the cross-service paths (frontend->Supabase,
