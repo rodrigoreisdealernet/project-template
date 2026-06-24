@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/data/supabase";
 
@@ -64,7 +64,11 @@ export const Route = createFileRoute("/nfse/")({
 
 function NfseExtractionsPage() {
   const queryClient = useQueryClient();
-  const { data: rows, isLoading, error } = useQuery({
+  const {
+    data: rows,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["nfse-extractions"],
     queryFn: fetchExtractions,
     // Surface scheduled-run results without a manual reload.
@@ -112,10 +116,12 @@ function NfseExtractionsPage() {
     <section className="max-w-6xl mx-auto space-y-6">
       <header className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Notas Fiscais (NFS-e) — Extrações</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Notas Fiscais (NFS-e) — Extrações
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Notas processadas automaticamente pelo workflow <code>nfse-ingest</code>. A varredura roda
-            sozinha a cada 15s; use “Scan now” para forçar agora.
+            Notas processadas automaticamente pelo workflow <code>nfse-ingest</code>. A varredura
+            roda sozinha a cada 15s; use “Scan now” para forçar agora.
           </p>
           {pendingReviewCount > 0 ? (
             <span
