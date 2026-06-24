@@ -6,6 +6,17 @@ const def = JSON.parse(
   readFileSync(join(__dirname, "..", "definitions", "nfse-ingest.json"), "utf8")
 ) as Record<string, unknown>;
 
+// ── Structural navigation helpers ───────────────────────────────────────────
+// Assert on the parsed control-flow tree (not substring presence) so the tests
+// fail if a value moves into a comment, the wrong step, or a dead branch.
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const topSteps = (def as any).steps.sequence.steps as any[];
+const forEachBody = topSteps[1].for_each.body.try_catch.try.sequence.steps as any[];
+const llmStep = forEachBody[1].activity;
+const persistCondition = forEachBody[2].condition;
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 describe("nfse-ingest definition", () => {
   it("is a structurally valid DSL definition", () => {
     expect(() => validateDefinition(def)).not.toThrow();
@@ -16,27 +27,48 @@ describe("nfse-ingest definition", () => {
     expect(String(def.version)).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
-  it("lists new invoices via the nfse_list_new activity (dedup before model call)", () => {
-    const json = JSON.stringify(def);
-    expect(json).toContain('"nfse_list_new"');
-    // dedup/list step comes before file_extract + llm_agent
-    expect(json.indexOf("nfse_list_new")).toBeLessThan(json.indexOf("llm_agent"));
+  it("runs nfse_list_new as the first step, before the per-invoice model call", () => {
+    // Structural: the dedup/list activity is the FIRST top-level step, and the
+    // model call lives inside the subsequent for_each body — not merely earlier
+    // in the serialized text.
+    expect(topSteps[0].activity.name).toBe("nfse_list_new");
+    expect(topSteps[1].for_each).toBeDefined();
+    expect(llmStep.name).toBe("llm_agent");
   });
 
-  it("calls Azure gpt-5.4 for extraction", () => {
-    const json = JSON.stringify(def);
-    expect(json).toContain('"azure-openai-responses"');
-    expect(json).toContain('"gpt-5.4"');
+  it("calls Azure gpt-5.4 via the llm_agent step with the nfse_extraction schema", () => {
+    expect(llmStep.args.provider).toBe("azure-openai-responses");
+    expect(llmStep.args.model_id).toBe("gpt-5.4");
+    expect(llmStep.args.temperature).toBe(0);
+    expect(llmStep.args.schema_name).toBe("nfse_extraction");
+    // Required fields the UI and dedup depend on are all in the response schema.
+    expect(llmStep.args.response_schema.required).toEqual(
+      expect.arrayContaining([
+        "numero_nota",
+        "prestador_razao_social",
+        "tomador_razao_social",
+        "valor_total",
+        "confidence",
+      ])
+    );
   });
 
-  it("persists to the real table workflow_document_extractions (not document_extractions)", () => {
-    const json = JSON.stringify(def);
-    expect(json).toContain('"workflow_document_extractions"');
-    expect(json).not.toContain('"table": "document_extractions"');
+  it("persists via an upsert into workflow_document_extractions keyed on source_url", () => {
+    const mutate = persistCondition.then.activity;
+    expect(mutate.name).toBe("supabase_mutate");
+    expect(mutate.args.operation).toBe("upsert");
+    expect(mutate.args.table).toBe("workflow_document_extractions");
+    expect(mutate.args.match).toEqual({ source_url: "$var.inv.content_url" });
+    // Provenance: extracted_at comes from the listing step's run_at.
+    expect(mutate.args.values.extracted_at).toBe("$var.listing.run_at");
+    // Guard against regressing to the wrong (non-existent) table name.
+    expect(JSON.stringify(def)).not.toContain('"table": "document_extractions"');
   });
 
-  it("guards persistence on content_filter_blocked == false", () => {
-    expect(JSON.stringify(def)).toContain("content_filter_blocked == false");
+  it("guards persistence on content_filter_blocked == false (wraps the mutate step)", () => {
+    // The guard must wrap the supabase_mutate step — not just appear somewhere.
+    expect(persistCondition.if).toBe("$var.extraction.content_filter_blocked == false");
+    expect(persistCondition.then.activity.name).toBe("supabase_mutate");
   });
 
   it("seed migration JSON matches the definition file (no drift)", () => {

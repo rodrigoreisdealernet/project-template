@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   countPendingReview,
   isLowConfidence,
+  isOutOfRangeConfidence,
   LOW_CONFIDENCE_THRESHOLD,
   needsReview,
 } from "./index";
@@ -26,13 +27,34 @@ describe("isLowConfidence", () => {
   });
 });
 
+// Regression (red-team #3): a probability must be in [0, 1]. An impossible value
+// like 1.5 ("150%") must NOT be trusted as high-confidence.
+describe("isOutOfRangeConfidence", () => {
+  it("flags values above 1 or below 0", () => {
+    expect(isOutOfRangeConfidence(1.5)).toBe(true);
+    expect(isOutOfRangeConfidence(-0.5)).toBe(true);
+  });
+
+  it("does not flag values within [0, 1] or non-numbers", () => {
+    expect(isOutOfRangeConfidence(0)).toBe(false);
+    expect(isOutOfRangeConfidence(1)).toBe(false);
+    expect(isOutOfRangeConfidence(0.42)).toBe(false);
+    expect(isOutOfRangeConfidence(null)).toBe(false);
+  });
+});
+
 describe("needsReview", () => {
   it("is true for confidence below the threshold", () => {
     expect(needsReview({ confidence: 0.5 })).toBe(true);
     expect(needsReview({ confidence: 0 })).toBe(true);
   });
 
-  it("is false at or above the threshold", () => {
+  it("is true for an out-of-range (impossible) confidence — never silently 'high'", () => {
+    expect(needsReview({ confidence: 1.5 })).toBe(true);
+    expect(needsReview({ confidence: -0.2 })).toBe(true);
+  });
+
+  it("is false at or above the threshold (and within range)", () => {
     expect(needsReview({ confidence: LOW_CONFIDENCE_THRESHOLD })).toBe(false);
     expect(needsReview({ confidence: 0.9 })).toBe(false);
     expect(needsReview({ confidence: 1 })).toBe(false);

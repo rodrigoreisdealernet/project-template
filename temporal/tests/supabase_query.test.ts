@@ -47,6 +47,64 @@ describe("supabase_mutate", () => {
     expect(row).toEqual({ id: "row-1", domain: "stripe.com", confidence: 0.99 });
   });
 
+  it("upserts an NFS-e extraction on source_url (dedup contract for workflow_document_extractions)", async () => {
+    // This is the exact mutation the nfse-ingest workflow performs. It is the
+    // write-side half of dedup: re-running over the same invoice must update the
+    // existing row (on_conflict=source_url + merge-duplicates), never insert a
+    // duplicate. Covered here because the orchestration test stubs supabase_mutate.
+    const persisted = {
+      id: "ext-1",
+      source_url: "http://mock-nfse-api:8090/invoices/402/content",
+      confidence: 0.95,
+    };
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true, json: async () => [persisted] });
+    global.fetch = fetchMock as typeof fetch;
+
+    const { supabase_mutate } = await import("../src/activities/supabase_query");
+    const row = await supabase_mutate({
+      operation: "upsert",
+      table: "workflow_document_extractions",
+      match: { source_url: persisted.source_url },
+      values: {
+        source_url: persisted.source_url,
+        extracted_fields: { numero_nota: "402", valor_total: 245.05 },
+        confidence: 0.95,
+        extracted_at: "2026-06-24T10:00:00.000Z",
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://127.0.0.1:54321/rest/v1/workflow_document_extractions?on_conflict=source_url",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Prefer: "resolution=merge-duplicates,return=representation",
+        }),
+      })
+    );
+    // The match key is merged into the body and the values are carried verbatim.
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+    expect(body).toMatchObject({
+      source_url: persisted.source_url,
+      confidence: 0.95,
+      extracted_at: "2026-06-24T10:00:00.000Z",
+      extracted_fields: { numero_nota: "402", valor_total: 245.05 },
+    });
+    expect(row).toEqual(persisted);
+  });
+
+  it("rejects an upsert with an empty match (would lose dedup and insert duplicates)", async () => {
+    const { supabase_mutate } = await import("../src/activities/supabase_query");
+    await expect(
+      supabase_mutate({
+        operation: "upsert",
+        table: "workflow_document_extractions",
+        match: {},
+        values: { source_url: "x", confidence: 0.5 },
+      })
+    ).rejects.toThrow(/requires at least one match key/);
+  });
+
   it("rejects update mutations without a match filter", async () => {
     const { supabase_mutate } = await import("../src/activities/supabase_query");
 
