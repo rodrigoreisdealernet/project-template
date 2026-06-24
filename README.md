@@ -4,7 +4,7 @@
 > run regenerates this branch. The machine-readable source of truth is [`runs.jsonl`](./runs.jsonl).
 > Deployed-environment E2E trends live separately on the [`e2e-history`](../../tree/e2e-history) branch.
 
-**Last updated:** 2026-06-24 20:52Z · 17 records · suites: `helm`, `seed`, `coverage`, `temporal`
+**Last updated:** 2026-06-24 20:58Z · 20 records · suites: `helm`, `seed`, `coverage`, `temporal`
 
 ![trend](./trend.svg)
 
@@ -12,21 +12,24 @@
 
 | Suite | Latest | When (UTC) | Pass 24h | Pass 7d | Green streak | Runs |
 |---|---|---|--:|--:|--:|--:|
-| `helm` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) | — | — | — | 5 | 5 |
-| `seed` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) | — | — | — | 5 | 5 |
+| `helm` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) | — | — | — | 6 | 6 |
+| `seed` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) | — | — | — | 6 | 6 |
 | `coverage` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) | — | — | — | 2 | 2 |
-| `temporal` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) | 2026-06-24 20:52Z | 100% (5) | 100% (5) | 5 | 5 |
+| `temporal` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) | 2026-06-24 20:58Z | 100% (6) | 100% (6) | 6 | 6 |
 
 
 ## Recent runs
 
 | When (UTC) | Suite | Result | Pass | Fail | Skip | Duration | Commit | Run |
 |---|---|---|--:|--:|--:|--:|---|---|
+| 2026-06-24 20:58Z | `temporal` | ✅ passed | 309 | 0 | 10 | 50.9s | `81ab525` | [#39](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) |
 | 2026-06-24 20:52Z | `temporal` | ✅ passed | 309 | 0 | 10 | 46.5s | `cb5efcb` | [#38](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) |
 | 2026-06-24 20:42Z | `temporal` | ✅ passed | 309 | 0 | 10 | 50.5s | `3e5b920` | [#36](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128257534) |
 | 2026-06-24 20:34Z | `temporal` | ✅ passed | 309 | 0 | 10 | 43.9s | `8dd9ec8` | [#35](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28127813060) |
 | 2026-06-24 20:16Z | `temporal` | ✅ passed | 309 | 0 | 10 | 45.4s | `64a743e` | [#33](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28126797968) |
 | 2026-06-24 20:00Z | `temporal` | ✅ passed | 309 | 0 | 10 | 45.9s | `c809ecc` | [#32](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28125900306) |
+| — | `seed` | ✅ passed | 1 | 0 | 0 | — | `81ab525` | [#39](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) |
+| — | `helm` | ✅ passed | 380 | 0 | 0 | — | `81ab525` | [#39](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) |
 | — | `coverage` | ✅ passed | 0 | 0 | 0 | — | `81ab525` | [#39](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28129147574) |
 | — | `seed` | ✅ passed | 1 | 0 | 0 | — | `cb5efcb` | [#38](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) |
 | — | `helm` | ✅ passed | 380 | 0 | 0 | — | `cb5efcb` | [#38](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128766691) |
