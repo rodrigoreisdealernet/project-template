@@ -4,7 +4,7 @@
 > run regenerates this branch. The machine-readable source of truth is [`runs.jsonl`](./runs.jsonl).
 > Deployed-environment E2E trends live separately on the [`e2e-history`](../../tree/e2e-history) branch.
 
-**Last updated:** 2026-06-24 21:32Z · 24 records · suites: `helm`, `seed`, `coverage`, `temporal`
+**Last updated:** 2026-06-24 21:32Z · 25 records · suites: `helm`, `seed`, `coverage`, `temporal`
 
 ![trend](./trend.svg)
 
@@ -14,7 +14,7 @@
 |---|---|---|--:|--:|--:|--:|
 | `helm` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) | — | — | — | 7 | 7 |
 | `seed` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) | — | — | — | 7 | 7 |
-| `coverage` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) | — | — | — | 3 | 3 |
+| `coverage` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28131101046) | — | — | — | 4 | 4 |
 | `temporal` | ✅ `passed` [↗](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) | 2026-06-24 21:32Z | 100% (7) | 100% (7) | 7 | 7 |
 
 
@@ -29,6 +29,7 @@
 | 2026-06-24 20:34Z | `temporal` | ✅ passed | 309 | 0 | 10 | 43.9s | `8dd9ec8` | [#35](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28127813060) |
 | 2026-06-24 20:16Z | `temporal` | ✅ passed | 309 | 0 | 10 | 45.4s | `64a743e` | [#33](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28126797968) |
 | 2026-06-24 20:00Z | `temporal` | ✅ passed | 309 | 0 | 10 | 45.9s | `c809ecc` | [#32](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28125900306) |
+| — | `coverage` | ✅ passed | 0 | 0 | 0 | — | `f86275b` | [#44](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28131101046) |
 | — | `seed` | ✅ passed | 1 | 0 | 0 | — | `83fb07f` | [#43](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) |
 | — | `helm` | ✅ passed | 380 | 0 | 0 | — | `83fb07f` | [#43](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) |
 | — | `coverage` | ✅ passed | 0 | 0 | 0 | — | `83fb07f` | [#43](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28130936873) |
@@ -41,7 +42,6 @@
 | — | `seed` | ✅ passed | 1 | 0 | 0 | — | `3e5b920` | [#36](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128257534) |
 | — | `helm` | ✅ passed | 380 | 0 | 0 | — | `3e5b920` | [#36](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28128257534) |
 | — | `seed` | ✅ passed | 1 | 0 | 0 | — | `8dd9ec8` | [#35](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28127813060) |
-| — | `helm` | ✅ passed | 380 | 0 | 0 | — | `8dd9ec8` | [#35](https://github.com/rodrigoreisdealernet/project-template/actions/runs/28127813060) |
 
 
 ## Unstable tests (recent window)
