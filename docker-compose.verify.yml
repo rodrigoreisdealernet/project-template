@@ -1,0 +1,9 @@
+name: 10x-stack-template
+
+# TEMPORARY override (safe to delete): runs the frontend dev server (Vite + HMR)
+# and maps host 3000 -> container 3000, replacing the base 3000:8080 mapping
+# used by the nginx production image.
+services:
+  frontend:
+    ports: !override
+      - "127.0.0.1:3000:3000"

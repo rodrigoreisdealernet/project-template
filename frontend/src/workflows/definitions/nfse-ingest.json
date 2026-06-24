@@ -1,0 +1,10 @@
+{
+  "name": "nfse-ingest",
+  "version": "1.0.0",
+  "description": "Automated NFS-e ingestion — lists new invoices from the source API, extracts fiscal fields via Azure gpt-5.4 inside a Temporal workflow, and persists them. Triggering with empty input runs one scan.",
+  "input_schema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  }
+}

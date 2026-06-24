@@ -8,6 +8,7 @@ import * as fileExtract from "./activities/file_extract";
 import * as httpRequest from "./activities/http_request";
 import * as llmAgent from "./activities/llm_agent";
 import * as llmEmbeddings from "./activities/llm_embeddings";
+import * as nfseListNew from "./activities/nfse_list_new";
 import * as notifications from "./activities/notifications";
 import * as scheduleTrigger from "./activities/schedule_trigger";
 import * as slackMessage from "./activities/slack_message";
@@ -42,6 +43,7 @@ async function main(): Promise<void> {
       ...transformData,
       ...llmAgent,
       ...llmEmbeddings,
+      ...nfseListNew,
       ...webSearch,
       ...webCrawl,
       ...vectorSearch,

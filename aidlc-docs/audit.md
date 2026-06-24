@@ -99,3 +99,73 @@ Complete audit trail of user inputs and AI responses. Append-only.
 **Context**: CONSTRUCTION — entering Code Generation planning.
 
 ---
+
+## Code Generation — Part 1 (Plan) Created
+**Timestamp**: 2026-06-24T15:39:19Z
+**AI Prompt**: "Ready to proceed with this code generation plan?"
+**User Input**: (pending — awaiting approval)
+**AI Response**: Created aidlc-docs/construction/plans/nfse-ingestion-code-generation-plan.md — 10 numbered steps with checkboxes + FR/BR traceability: (1) env wiring, (2) mock NFS-e API compose service, (3) nfse-ingest DSL definition incl. Design-C dedup + design-risk check, (4) activation migration, (5) Edge whitelist, (6) Temporal Schedule bootstrap (15s/SKIP), (7) frontend results page + Scan now, (8) example-based tests, (9) ADR-0152, (10) code summaries. ~12–16 files, additive, no PBT. Awaiting plan approval before Part 2 generation.
+**Context**: CONSTRUCTION — Code Generation Part 1; awaiting plan approval.
+
+---
+
+## Code Generation — Part 1 Approved; Part 2 Started
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado"
+**AI Response**: Plan approved. Marked Part 1 complete. Began Part 2 generation — first reading DSL interpreter/expression + http_request/supabase_mutate signatures + an existing definition to ground the nfse-ingest definition and resolve the Design-C dedup risk.
+**Context**: CONSTRUCTION — Code Generation Part 2 in progress.
+
+---
+
+## Code Generation — Part 2 Complete
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: (pending — awaiting approval)
+**AI Response**: Generated all 10 steps. Created: mock-nfse-api service (3 files), nfse_list_new activity, nfse-ingest.json definition, activation migration, schedule bootstrap script, frontend results route + registry json, ADR-0152, 3 tests, code-summary. Modified: .env.example, .env (gitignored), docker-compose.yml, config.ts, worker.ts, trigger-workflow index+test, Makefile, frontend definitions.ts, __root.tsx. DESIGN-RISK RESOLVED: Design-C per-item DSL dedup infeasible ($env reads var-bag not process.env; supabase_query is stub) → implemented dedup via new nfse_list_new activity; back-propagated to functional-design docs + ADR-0152. Presented 2-option completion gate.
+**Context**: CONSTRUCTION — Code Generation complete; awaiting approval to proceed to Build and Test.
+
+---
+
+## Code Generation — Approval
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado"
+**AI Response**: Code generation approved. Proceeding to Build and Test (generate instructions + run feasible verification: typecheck, definition validation, unit tests).
+**Context**: CONSTRUCTION — entering Build and Test.
+
+---
+
+## Build and Test Stage
+**Timestamp**: 2026-06-24T15:39:19Z
+**Build Status**: Success (static): worker typecheck `tsc -p tsconfig.test.json` exit 0; DSL definition validated via validateDefinition (all 7 checks pass).
+**Test Status**: Unit tests written (worker definition + dedup, edge whitelist, frontend low-confidence). Full jest/vitest/deno runs + live e2e pending complete dev env (sandbox had partial test runner — ts-jest resolution). 
+**Files Generated**: build-instructions.md, unit-test-instructions.md, integration-test-instructions.md, build-and-test-summary.md.
+**Context**: CONSTRUCTION — Build and Test complete; awaiting approval. Operations is placeholder. Day-2 SDD step 5 (open PR) is the real-world follow-up.
+
+---
+
+## Build and Test — Approval (AIDLC construction complete)
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado. Utilize o máximo de sub agents que conseguir. Crie um HTML me apresentando o status de cada tarefa executada por cada sub agent, mantenha esse HTML atualizado"
+**AI Response**: Build and Test approved — AIDLC construction complete for nfse-ingestion (Operations is placeholder). Per user request, launching a parallel sub-agent QA/review fan-out over the feature and rendering a live status dashboard at reports/nfse-qa-dashboard.html.
+**Context**: Post-AIDLC verification fan-out.
+
+---
+
+## Post-Construction Improvements — Analysis Request
+**Timestamp**: 2026-06-24T18:05:49Z
+**User Input**: "Analise a feature que está sendo implementada usndo aidlc e proponha 3 melhorias"
+**AI Response**: Analyzed the nfse-ingestion feature (ADR-0152, DSL definition, nfse_list_new activity, functional design, frontend route). Proposed 3 improvements: (#1) make temporal/definitions/nfse-ingest.json the single source of truth and guard against drift with a parity test (the ADR's own "Negative"); (#2) replace the full-table dedup read with a bounded membership query (source_url=in.(...)); (#3) add a low-confidence review path in the UI (filter, counter, link to original PDF).
+**Context**: Post-construction enhancement analysis for unit nfse-ingestion.
+
+---
+
+## Post-Construction Improvements — Implementation (parallel sub-agents)
+**Timestamp**: 2026-06-24T18:05:49Z
+**User Input**: "Implementar as 3 usando subagents, crie um HTML onde cada agente irá atualizar o status da sua feature"
+**AI Response**: Implemented all 3 improvements via 3 parallel general-purpose sub-agents over disjoint file sets, with a live status dashboard at reports/nfse-improvements/dashboard.html (reads agent-1/2/3.js, auto-refresh 1.5s).
+  - #1 Drift guard (agent 1): re-synced the seed migration's embedded JSON to mirror temporal/definitions/nfse-ingest.json (the `description` had drifted) and added 2 guard tests to temporal/tests/nfse-ingest.definition.test.ts (seed==file deep-equal; bootstrap derives from file, no embedded copy). Jest 8/8 pass.
+  - #2 Bounded dedup (agent 2): replaced the full-table pager in temporal/src/activities/nfse_list_new.ts with a membership read (source_url=in.(...), chunked at CHUNK_SIZE=100, encoded; empty source list skips the DB). Updated temporal/tests/nfse_list_new.test.ts (+bounded-query assertion, +empty-source no-DB-call). Jest 4/4 pass.
+  - #3 Review path UI (agent 3): added exported helpers needsReview/countPendingReview, a "N pendente(s) de revisão" chip, a "Mostrar só pendentes de revisão" filter toggle, and an "Original" column linking to source_url (target=_blank rel=noopener) in frontend/src/routes/nfse/index.tsx; added unit tests in nfse-extractions.test.tsx. vitest 8/8 pass + tsc --noEmit clean.
+  Scopes were disjoint (no file conflicts). Each sub-agent ran `npm install` to repair/create node_modules (pre-existing env quirk). Nothing committed. Updated aidlc-state.md and ADR-0152 (drift "Negative" now mitigated).
+**Context**: CONSTRUCTION — additive post-construction improvements to unit nfse-ingestion; no new AIDLC stage (changes within existing component boundaries, verified by unit tests).
+
+---

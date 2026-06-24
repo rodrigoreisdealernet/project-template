@@ -10,7 +10,7 @@ interface TriggerWorkflowResponse {
   run_id: string;
 }
 
-const TRIGGERABLE_DEFINITIONS = new Set<string>(["smoke-classification"]);
+const TRIGGERABLE_DEFINITIONS = new Set<string>(["smoke-classification", "nfse-ingest"]);
 
 export function isTriggerableDefinition(definitionName: string): boolean {
   return TRIGGERABLE_DEFINITIONS.has(definitionName);

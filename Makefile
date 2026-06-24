@@ -12,7 +12,7 @@ endif
 
 COMPOSE_CMD=docker compose $(foreach file,$(COMPOSE_FILES),-f $(file))
 
-.PHONY: up up-https down reset logs logs-temporal logs-frontend supabase-status test-temporal setup lint certs bootstrap-users verify
+.PHONY: up up-https down reset logs logs-temporal logs-frontend supabase-status test-temporal setup lint certs bootstrap-users verify nfse-schedule
 
 # Install git hooks and dev tooling. Run once after cloning.
 setup:
@@ -36,8 +36,16 @@ up:
 	supabase start --exclude studio
 	@eval "$$(./scripts/supabase-env.sh)"; $(COMPOSE_CMD) up -d
 	@echo ""
+	@echo "Creating NFS-e ingest schedule (every 15s)..."
+	-@$(MAKE) --no-print-directory nfse-schedule
+	@echo ""
 	@echo "Stack up. Frontend http://localhost:3000 | Temporal UI http://localhost:8081"
 	@echo "Run 'make bootstrap-users' to create dev users."
+
+# Create (idempotently) the Temporal Schedule that runs nfse-ingest every 15s.
+# Requires Temporal up (make up) and the nfse-ingest definition active (migration).
+nfse-schedule:
+	cd temporal && npx ts-node --project tsconfig.json ../scripts/bootstrap-nfse-schedule.ts
 
 # Start stack with HTTPS reverse proxy (Traefik + self-signed cert).
 # Run `make up-https` — certs are generated automatically on first run.

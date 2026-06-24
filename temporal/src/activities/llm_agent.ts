@@ -238,14 +238,26 @@ export async function llm_agent(args: LlmAgentArgs): Promise<LlmAgentResult> {
   // (/openai/v1/chat/completions) is universally available and accepts api-key + api-version
   // as request headers. We build a custom model object to use openai-completions.
   let model: unknown;
+  // Captured for the azure-openai-responses path so we can pass it to complete()
+  // via options.apiKey below. pi-ai resolves auth from options.apiKey first, then
+  // falls back to getEnvApiKey(model.provider) — and since the Azure model uses
+  // provider "openai", that fallback reads OPENAI_API_KEY, which is empty here.
+  let azureApiKey = "";
   if (provider === "azure-openai-responses") {
     const azureBaseUrl = process.env.AZURE_OPENAI_BASE_URL ?? "";
-    const azureApiKey = process.env.AZURE_OPENAI_API_KEY ?? "";
+    azureApiKey = process.env.AZURE_OPENAI_API_KEY ?? "";
     const azureVersion = process.env.AZURE_OPENAI_API_VERSION ?? "2025-03-01-preview";
     if (!azureBaseUrl)
       throw new Error(
         "AZURE_OPENAI_BASE_URL (or AZURE_API_BASE) is required for provider azure-openai-responses"
       );
+    // The custom model below uses provider "openai", so pi-ai gates client
+    // creation on an OpenAI API key. Azure authenticates via the `api-key` header
+    // (set in model.headers), but pi-ai still requires a non-empty key for the
+    // "openai" provider — backfill it from the Azure key so the gate passes.
+    if (!process.env.OPENAI_API_KEY && azureApiKey) {
+      process.env.OPENAI_API_KEY = azureApiKey;
+    }
     model = {
       id: modelId,
       name: `Azure ${modelId}`,
@@ -257,6 +269,10 @@ export async function llm_agent(args: LlmAgentArgs): Promise<LlmAgentResult> {
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       contextWindow: 200000,
       maxTokens: 16384,
+      // Azure reasoning models (e.g. gpt-5.x) reject `max_tokens` and require
+      // `max_completion_tokens`. pi-ai picks the field from compat.maxTokensField
+      // (openai-completions.js getCompat/buildParams); force the correct one here.
+      compat: { maxTokensField: "max_completion_tokens" },
       headers: {
         "api-key": azureApiKey,
         "api-version": azureVersion,
@@ -365,6 +381,10 @@ export async function llm_agent(args: LlmAgentArgs): Promise<LlmAgentResult> {
     )(model, context, {
       temperature: args.temperature ?? 0,
       maxTokens: args.max_tokens ?? 2000,
+      // Azure: pass the key explicitly. The Azure model uses provider "openai", so
+      // pi-ai would otherwise fall back to getEnvApiKey("openai") → OPENAI_API_KEY
+      // (empty), failing with "No API key for provider: openai".
+      ...(provider === "azure-openai-responses" ? { apiKey: azureApiKey } : {}),
     }).catch((err: Error) => {
       if (/content.filter|safety|policy/i.test(err.message)) {
         blocked = true;
@@ -374,6 +394,15 @@ export async function llm_agent(args: LlmAgentArgs): Promise<LlmAgentResult> {
     });
 
     if (!msg) break;
+
+    // pi-ai signals provider/transport failures (auth, 4xx/5xx, content_filter
+    // finish_reason, etc.) by returning a message with stopReason "error" and the
+    // real cause in errorMessage — it does not throw. Surface it instead of letting
+    // the schema branch below misreport it as "model returned text" with no preview,
+    // which masks the cause and triggers pointless Temporal retries.
+    if (msg.stopReason === "error") {
+      throw new Error(`llm_agent: provider error — ${(msg.errorMessage as string) ?? "unknown"}`);
+    }
 
     lastMsg = msg;
     const usage = msg.usage as { input: number; output: number };

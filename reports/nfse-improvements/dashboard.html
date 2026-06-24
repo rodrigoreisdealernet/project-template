@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NFS-e · 3 melhorias — status ao vivo</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0f1521; --border:#1f2a3d;
+    --txt:#e6edf6; --muted:#8aa0bd; --accent:#5b9dff;
+    --pending:#64748b; --running:#f5b13d; --testing:#3da5f5; --done:#37d399; --failed:#fc6d6d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#16243d 0%,var(--bg) 55%);color:var(--txt);
+    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  h1{font-size:22px;margin:0;letter-spacing:-.2px}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .live{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);
+    border-radius:999px;padding:8px 14px;font-size:12px;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--done);box-shadow:0 0 0 0 rgba(55,211,153,.6);
+    animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(55,211,153,.5)}70%{box-shadow:0 0 0 8px rgba(55,211,153,0)}100%{box-shadow:0 0 0 0 rgba(55,211,153,0)}}
+  .overall{height:6px;background:var(--panel2);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-bottom:26px}
+  .overall > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#37d399,#5b9dff);transition:width .5s ease}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:16px;
+    padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;min-height:330px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--state-color,var(--pending));opacity:.9}
+  .ctop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .ctitle{font-size:15px;font-weight:650;letter-spacing:-.1px}
+  .csub{color:var(--muted);font-size:12px;margin-top:3px}
+  .owner{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:#6b82a3;margin-top:6px;word-break:break-all}
+  .pill{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:4px 10px;border-radius:999px;
+    color:#0b0f17;background:var(--state-color,var(--pending))}
+  .pill.dim{color:#cdd9ea;background:transparent;border:1px solid var(--state-color,var(--pending))}
+  .bar{height:7px;background:#0b1220;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:var(--state-color,var(--pending));transition:width .5s ease}
+  .pct{font-size:11px;color:var(--muted);text-align:right}
+  .current{font-size:12.5px;color:var(--txt);background:#0b1220;border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+  .current b{color:var(--state-color,var(--accent))}
+  ul.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  ul.steps li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--muted)}
+  ul.steps li .bx{flex:none;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border);margin-top:2px;display:grid;place-items:center;font-size:10px}
+  ul.steps li.done{color:var(--txt)}
+  ul.steps li.done .bx{background:var(--done);border-color:var(--done);color:#06281c}
+  ul.steps li.active .bx{border-color:var(--running);box-shadow:0 0 0 3px rgba(245,177,61,.15)}
+  ul.steps li.active{color:#fff}
+  .log{margin-top:auto;background:#070b12;border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-family:ui-monospace,Menlo,monospace;
+    font-size:11px;color:#8fb4e6;max-height:96px;overflow:auto;white-space:pre-wrap}
+  .log .ln{opacity:.55}
+  .log .ln:last-child{opacity:1;color:#bcd7ff}
+  .seen{font-size:10.5px;color:#5b6c85;display:flex;align-items:center;gap:6px}
+  .seen .d{width:6px;height:6px;border-radius:50%;background:var(--state-color,var(--pending))}
+  .result{font-size:12px;border-top:1px dashed var(--border);padding-top:9px;color:#bfe9d4}
+  .result.fail{color:#ffc2c2}
+  footer{margin-top:26px;color:#566782;font-size:11.5px;text-align:center}
+  code{background:#0b1220;border:1px solid var(--border);border-radius:5px;padding:1px 5px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>NFS-e · Ingestão automática — 3 melhorias</h1>
+      <div class="sub">Cada agente atualiza seu próprio status enquanto implementa. Atualiza sozinho a cada 1,5s.</div>
+    </div>
+    <div class="live"><span class="dot"></span><span id="live-text">conectando…</span></div>
+  </header>
+
+  <div class="overall"><i id="overall-bar"></i></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    Dashboard local — lê <code>agent-1.js</code>, <code>agent-2.js</code>, <code>agent-3.js</code> nesta pasta.
+    Se os cards não atualizarem ao abrir via <code>file://</code>, sirva a pasta:
+    <code>python -m http.server 8077</code> e abra <code>http://localhost:8077/dashboard.html</code>.
+  </footer>
+</div>
+
+<script>
+  var STATE_COLOR = { pending:"--pending", running:"--running", testing:"--testing", done:"--done", failed:"--failed" };
+  var STATE_LABEL = { pending:"pendente", running:"rodando", testing:"testando", done:"concluído", failed:"falhou" };
+  var lastHash = {};      // id -> JSON string, to detect changes
+  var lastChange = {};    // id -> ms timestamp of last change
+  var IDS = [1,2,3];
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function render(){
+    var agents = window.__AGENTS || {};
+    var grid = document.getElementById("grid");
+    var doneCount = 0, totalPct = 0, anySeen = false;
+
+    var html = "";
+    IDS.forEach(function(id){
+      var a = agents[id];
+      if(!a){ return; }
+      anySeen = true;
+      var color = "var(" + (STATE_COLOR[a.state] || "--pending") + ")";
+      var pct = Math.max(0, Math.min(100, a.progress || 0));
+      totalPct += pct;
+      if(a.state === "done") doneCount++;
+
+      var h = JSON.stringify(a);
+      if(lastHash[id] !== h){ lastHash[id] = h; lastChange[id] = Date.now(); }
+
+      var steps = (a.steps||[]).map(function(s, i){
+        var firstUndone = (a.steps||[]).findIndex(function(x){return !x.done;});
+        var cls = s.done ? "done" : (i === firstUndone && a.state!=="done" ? "active" : "");
+        return '<li class="'+cls+'"><span class="bx">'+(s.done?"✓":"")+'</span><span>'+esc(s.label)+'</span></li>';
+      }).join("");
+
+      var logs = (a.log||[]).slice(-6).map(function(l){return '<div class="ln">'+esc(l)+'</div>';}).join("") || '<div class="ln">—</div>';
+      var pillClass = (a.state==="pending") ? "pill dim" : "pill";
+      var resultHtml = a.result ? '<div class="result '+(a.state==="failed"?"fail":"")+'">'+esc(a.result)+'</div>' : "";
+
+      h_card =
+        '<div class="card" style="--state-color:'+color+'">'+
+          '<div class="ctop">'+
+            '<div><div class="ctitle">'+esc(a.title)+'</div>'+
+              '<div class="csub">'+esc(a.subtitle||"")+'</div>'+
+              '<div class="owner">'+esc(a.owner||"")+'</div></div>'+
+            '<div class="'+pillClass+'">'+(STATE_LABEL[a.state]||a.state)+'</div>'+
+          '</div>'+
+          '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+          '<div class="pct">'+pct+'%</div>'+
+          '<div class="current"><b>▸</b> '+esc(a.current||"")+'</div>'+
+          '<ul class="steps">'+steps+'</ul>'+
+          resultHtml+
+          '<div class="log">'+logs+'</div>'+
+          '<div class="seen"><span class="d"></span><span data-seen="'+id+'">agora</span></div>'+
+        '</div>';
+      html += h_card;
+    });
+
+    grid.innerHTML = html || '<div class="csub">Aguardando os agentes publicarem status…</div>';
+    document.getElementById("overall-bar").style.width = (totalPct/IDS.length) + "%";
+    var lt = document.getElementById("live-text");
+    lt.textContent = anySeen ? (doneCount + "/" + IDS.length + " concluídos") : "aguardando agentes…";
+  }
+
+  function tickSeen(){
+    IDS.forEach(function(id){
+      var el = document.querySelector('[data-seen="'+id+'"]');
+      if(!el || !lastChange[id]) return;
+      var s = Math.round((Date.now()-lastChange[id])/1000);
+      el.textContent = s < 2 ? "atualizado agora" : ("atualizado há "+s+"s");
+    });
+  }
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+  // Poll by re-injecting the three status scripts with a cache-busting query.
+  function poll(){
+    IDS.forEach(function(id){
+      var s = document.createElement("script");
+      s.src = "agent-"+id+".js?t=" + Date.now();
+      s.onload = function(){ render(); s.remove(); };
+      s.onerror = function(){ s.remove(); };
+      document.head.appendChild(s);
+    });
+  }
+
+  render();
+  poll();
+  setInterval(poll, 1500);
+  setInterval(tickSeen, 1000);
+</script>
+</body>
+</html>
