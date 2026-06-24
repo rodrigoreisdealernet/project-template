@@ -62,7 +62,7 @@ function formatBRL(value: unknown): string {
 // We parse the Y/M/D parts directly instead of using new Date(...), which would
 // interpret a date-only string as UTC midnight and can shift the calendar date in
 // the local timezone. Anything that isn't a valid YYYY-MM-DD date → "—".
-function formatDateBR(value: unknown): string {
+export function formatDateBR(value: unknown): string {
   if (typeof value !== "string") return "—";
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
   if (!match) return "—";

@@ -101,6 +101,39 @@ describe("NfseExtractionsPage — rendering", () => {
 
     // Original PDF link points at the source_url.
     expect(cells.getByTestId("nfse-open-source")).toHaveAttribute("href", row().source_url);
+
+    // Issue #28 (AC1): the Emissão column (5th cell) shows the date in DD/MM/AAAA,
+    // not the raw ISO "2026-06-20".
+    const emissaoCell = rows[0].querySelectorAll("td")[4];
+    expect(emissaoCell.textContent).toBe("20/06/2026");
+  });
+
+  // Issue #28 (AC2): a null data_emissao renders the em dash placeholder, not
+  // "Invalid Date" or an empty cell.
+  it("renders an em dash in the Emissão column for a null data_emissao", async () => {
+    extractionsResult = {
+      data: [
+        row({
+          id: "no-date",
+          extracted_fields: {
+            numero_nota: "402",
+            valor_total: 245.05,
+            data_emissao: null,
+          },
+        }),
+      ],
+      isLoading: false,
+      error: null,
+    };
+    await renderPage();
+
+    const r = (await screen.findAllByTestId("nfse-row"))[0];
+    // Emissão is the 5th column (index 4).
+    const emissaoCell = r.querySelectorAll("td")[4];
+    expect(emissaoCell.textContent).toBe("—");
+    // And no raw/invalid date leaked into the row.
+    expect(within(r).queryByText("Invalid Date")).not.toBeInTheDocument();
+    expect(within(r).queryByText(/\d{4}-\d{2}-\d{2}/)).not.toBeInTheDocument();
   });
 
   it("flags a low-confidence row with the amber badge and a pending-review pill", async () => {

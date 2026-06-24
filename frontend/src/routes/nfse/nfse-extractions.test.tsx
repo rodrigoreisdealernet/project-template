@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   countPendingReview,
+  formatDateBR,
   isLowConfidence,
   isOutOfRangeConfidence,
   LOW_CONFIDENCE_THRESHOLD,
@@ -81,5 +82,57 @@ describe("countPendingReview", () => {
 
   it("returns 0 for an empty array", () => {
     expect(countPendingReview([])).toBe(0);
+  });
+});
+
+// Issue #28: the "Emissão" column formats date-only ISO strings (YYYY-MM-DD) to
+// Brazilian locale (DD/MM/AAAA), mirroring formatBRL's defensive fallback to "—".
+describe("formatDateBR", () => {
+  // AC1: valid ISO date renders DD/MM/AAAA.
+  it("formats a valid YYYY-MM-DD date to DD/MM/AAAA", () => {
+    expect(formatDateBR("2026-06-20")).toBe("20/06/2026");
+    // Trailing/leading whitespace is trimmed before parsing.
+    expect(formatDateBR("  2026-06-20  ")).toBe("20/06/2026");
+    // Boundary day/month values stay intact (no off-by-one timezone shift).
+    expect(formatDateBR("2026-01-01")).toBe("01/01/2026");
+    expect(formatDateBR("2026-12-31")).toBe("31/12/2026");
+  });
+
+  // AC2: null / undefined render as "—" without error.
+  it("returns an em dash for null or undefined", () => {
+    expect(formatDateBR(null)).toBe("—");
+    expect(formatDateBR(undefined)).toBe("—");
+  });
+
+  // AC2/AC3: empty or whitespace-only strings have no date to parse -> "—".
+  it("returns an em dash for empty or whitespace-only strings", () => {
+    expect(formatDateBR("")).toBe("—");
+    expect(formatDateBR("   ")).toBe("—");
+  });
+
+  // AC3: non-string inputs are never a valid date -> "—" (no "Invalid Date").
+  it("returns an em dash for non-string input", () => {
+    expect(formatDateBR(20260620)).toBe("—");
+    expect(formatDateBR(new Date("2026-06-20"))).toBe("—");
+    expect(formatDateBR({ data_emissao: "2026-06-20" })).toBe("—");
+    expect(formatDateBR(["2026-06-20"])).toBe("—");
+  });
+
+  // AC3: malformed strings (wrong separator, free text, partial dates) -> "—".
+  it("returns an em dash for malformed date strings", () => {
+    expect(formatDateBR("not-a-date")).toBe("—");
+    expect(formatDateBR("2026/06/20")).toBe("—"); // wrong separator
+    expect(formatDateBR("2026-6-20")).toBe("—"); // not zero-padded
+    expect(formatDateBR("20-06-2026")).toBe("—"); // DD-MM-YYYY order
+    expect(formatDateBR("2026-06-20T10:00:00Z")).toBe("—"); // datetime, not date-only
+    expect(formatDateBR("2026-06")).toBe("—"); // missing day
+  });
+
+  // AC3: structurally valid but out-of-range month/day -> "—", not "Invalid Date".
+  it("returns an em dash for out-of-range month or day", () => {
+    expect(formatDateBR("2026-13-01")).toBe("—"); // month > 12
+    expect(formatDateBR("2026-00-10")).toBe("—"); // month < 1
+    expect(formatDateBR("2026-06-32")).toBe("—"); // day > 31
+    expect(formatDateBR("2026-06-00")).toBe("—"); // day < 1
   });
 });
