@@ -195,9 +195,7 @@ function Sidebar() {
           <LayoutDashboard
             className={cn(
               "h-4 w-4 shrink-0",
-              isDashboard
-                ? "text-white/90"
-                : "text-sidebar-foreground group-hover:text-white/80"
+              isDashboard ? "text-white/90" : "text-sidebar-foreground group-hover:text-white/80"
             )}
           />
           Dashboard
@@ -215,9 +213,7 @@ function Sidebar() {
           <GitBranch
             className={cn(
               "h-4 w-4 shrink-0",
-              isWorkflows
-                ? "text-white/90"
-                : "text-sidebar-foreground group-hover:text-white/80"
+              isWorkflows ? "text-white/90" : "text-sidebar-foreground group-hover:text-white/80"
             )}
           />
           Workflows
