@@ -1,0 +1,95 @@
+{
+  "issue": {
+    "number": 28,
+    "title": "Coluna Emissão da lista de NFS-e mostra data ISO crua em vez de DD/MM/AAAA",
+    "url": "https://github.com/rodrigoreisdealernet/project-template/issues/28"
+  },
+  "slug": "nfse-emissao-format",
+  "branch": "feature/28-nfse-emissao-format",
+  "pr": {
+    "number": 29,
+    "url": "https://github.com/rodrigoreisdealernet/project-template/pull/29"
+  },
+  "gate": "merge",
+  "startedAt": "2026-06-24T21:15:52.336Z",
+  "updatedAt": "2026-06-24T21:30:12.259Z",
+  "steps": [
+    {
+      "id": "spec",
+      "status": "done",
+      "startedAt": "2026-06-24T21:15:52.477Z",
+      "finishedAt": "2026-06-24T21:16:37.655Z",
+      "summary": "6 acceptance criteria drafted (grounded in index.tsx:225/54)",
+      "notes": [],
+      "artifacts": [
+        {
+          "label": "Spec",
+          "href": "docs/specs/28-nfse-emissao-format.md"
+        },
+        {
+          "label": "Spec comment",
+          "href": "https://github.com/rodrigoreisdealernet/project-template/issues/28"
+        }
+      ]
+    },
+    {
+      "id": "approve",
+      "status": "done",
+      "startedAt": null,
+      "finishedAt": "2026-06-24T21:21:39.757Z",
+      "summary": "Spec approved by human",
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "code",
+      "status": "done",
+      "startedAt": "2026-06-24T21:21:39.963Z",
+      "finishedAt": "2026-06-24T21:23:30.805Z",
+      "summary": "formatDateBR helper + Emissao cell; typecheck clean (index.tsx)",
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "tests",
+      "status": "done",
+      "startedAt": "2026-06-24T21:23:30.937Z",
+      "finishedAt": "2026-06-24T21:26:32.875Z",
+      "summary": "31/31 green (unit + component, src/routes/nfse)",
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "test-review",
+      "status": "done",
+      "startedAt": "2026-06-24T21:26:32.999Z",
+      "finishedAt": "2026-06-24T21:29:09.743Z",
+      "summary": "1 iteration: closed component-level malformed-date gap (32/32 green)",
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "code-review",
+      "status": "done",
+      "startedAt": "2026-06-24T21:29:09.894Z",
+      "finishedAt": "2026-06-24T21:30:12.138Z",
+      "summary": "Verdict: approve-recommended (1 non-blocking note: impossible calendar dates)",
+      "notes": [],
+      "artifacts": [
+        {
+          "label": "PR review",
+          "href": "https://github.com/rodrigoreisdealernet/project-template/pull/29"
+        }
+      ]
+    },
+    {
+      "id": "merge",
+      "status": "waiting",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    }
+  ]
+}
