@@ -28,6 +28,17 @@ do this instead:
   for this run (issue number/body, spec path, diff, PR number, reviewer mode, etc.).
   The subagent runs in an isolated context, so pass every path and value explicitly
   — never assume it can see this conversation.
+- **Live progress (required)**: the orchestrator is *blocked* while a subagent
+  runs, so it cannot update the dashboard mid-step. Therefore **pass the dashboard
+  base path** (`docs/ship-issue/<issue-number>-<slug>`) to every subagent and
+  instruct it to post short progress notes to the dashboard **as it works** (the
+  built-in agents have Bash and repo access):
+  `node .github/scripts/ship-issue-dashboard.mjs set <base> <stepId> running --note "<what I'm doing now>"`
+  — once when it starts and again at each meaningful milestone (e.g. "reading
+  index.tsx", "writing unit tests", "running vitest", "posting PR review"). Each
+  call re-renders the HTML, so a watcher sees the step advance in real time instead
+  of a frozen "running". The orchestrator still owns the `running`→`done` boundary
+  transitions; the subagent only appends notes (never sets `done`/`failed`).
 
 ## Arguments
 
