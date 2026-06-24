@@ -71,3 +71,8 @@ volaris_test_data-main
 
 *.txt
 !deploy/azure/afd-backend-cidrs.txtoverride.tf
+
+# AIDLC source clone (separate repo — reference only, do not commit)
+aidlc-workflows/
+install-linux.sh
+.deep-research/
