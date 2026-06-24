@@ -136,6 +136,34 @@ describe("NfseExtractionsPage — rendering", () => {
     expect(within(r).queryByText(/\d{4}-\d{2}-\d{2}/)).not.toBeInTheDocument();
   });
 
+  // Issue #28 (AC3): an unparseable data_emissao renders the em dash placeholder,
+  // not "Invalid Date" and not the raw malformed string.
+  it("renders an em dash in the Emissão column for an unparseable data_emissao", async () => {
+    extractionsResult = {
+      data: [
+        row({
+          id: "bad-date",
+          extracted_fields: {
+            numero_nota: "402",
+            valor_total: 245.05,
+            data_emissao: "2026/06/20",
+          },
+        }),
+      ],
+      isLoading: false,
+      error: null,
+    };
+    await renderPage();
+
+    const r = (await screen.findAllByTestId("nfse-row"))[0];
+    // Emissão is the 5th column (index 4).
+    const emissaoCell = r.querySelectorAll("td")[4];
+    expect(emissaoCell.textContent).toBe("—");
+    // No "Invalid Date" and no raw malformed string leaked into the row.
+    expect(within(r).queryByText("Invalid Date")).not.toBeInTheDocument();
+    expect(within(r).queryByText("2026/06/20")).not.toBeInTheDocument();
+  });
+
   it("flags a low-confidence row with the amber badge and a pending-review pill", async () => {
     extractionsResult = {
       data: [row({ id: "low", confidence: 0.42 })],
