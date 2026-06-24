@@ -1,15 +1,15 @@
 # Engineering health dashboard
 
-Generated: 2026-06-24 20:17Z
+Generated: 2026-06-24 20:18Z
 
 ## CI suites
 
 | Suite | Last outcome | Last run | Pass 24h | Pass 7d | SLO | Streak |
 |---|---|---|---:|---:|---|---:|
 | `unit` | — | — | — | — | — | 0 |
-| `temporal` | ✅ passed | 2026-06-24 20:00Z | 100% (1) | 100% (1) | — | 1 |
-| `helm` | ✅ passed | — | — | — | — | 1 |
-| `seed` | ✅ passed | — | — | — | — | 1 |
+| `temporal` | ✅ passed | 2026-06-24 20:16Z | 100% (2) | 100% (2) | — | 2 |
+| `helm` | ✅ passed | — | — | — | — | 2 |
+| `seed` | ✅ passed | — | — | — | — | 2 |
 
 ## E2E suites
 
@@ -39,7 +39,7 @@ Generated: 2026-06-24 20:17Z
 | Workflow | Last run | Outcome |
 |---|---|---|
 | `pipeline-daily` | — | — |
-| `monitor-actions` | — | — |
+| `monitor-actions` | 2026-06-24 20:18Z | ✅ passed |
 | `validate-dsl-definitions` | — | — |
 | `validate-ontology` | — | — |
 
