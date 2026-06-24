@@ -2,6 +2,8 @@
 
 The UI follows the existing JSON-driven UI engine (ADR-0018): a page is a JSON definition rendered by `UIEngine`, with Supabase data sources and `{{expression}}` bindings. A thin route file wraps the page JSON. Auth is enforced globally by `AuthGate`→`MfaGate`.
 
+> **IMPLEMENTATION NOTE (back-propagated from Code Generation):** the results screen was built as a **custom React route component** (`frontend/src/routes/nfse/index.tsx`), NOT a JSON-engine page. Reason: the "Scan now" action needs an authenticated POST to the Edge Function, which the JSON engine's `apiCall` (supabase rpc/table oriented) does not express cleanly. The existing workflow screens (`routes/workflows/trigger.tsx`, `routes/workflows/executions/$workflowId.tsx`) are also custom React components, so this is consistent with the codebase. The list still reads `workflow_document_extractions` directly via supabase-js (TanStack Query), and the low-confidence badge rule (BR-9) is preserved.
+
 ## New page: NFS-e Extractions (results)
 - **Page JSON**: `frontend/src/pages/nfse-extractions.json` (new).
 - **Route**: `frontend/src/routes/nfse/index.tsx` (new) — wraps the page JSON via `UIEngine`.

@@ -4,7 +4,7 @@
 - **Project Type**: Brownfield
 - **Feature**: Automated NFS-e ingestion & field extraction (Temporal workflow + Azure gpt-5.4 + Supabase + React UI)
 - **Start Date**: 2026-06-24T15:39:19Z
-- **Current Stage**: CONSTRUCTION - Functional Design complete (awaiting approval → Code Generation)
+- **Current Stage**: CONSTRUCTION - Build and Test complete (awaiting approval → Operations/placeholder). Feature implementation DONE.
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -50,8 +50,8 @@
 - [ ] NFR Requirements — SKIP
 - [ ] NFR Design — SKIP
 - [ ] Infrastructure Design — SKIP
-- [ ] Code Generation — EXECUTE
-- [ ] Build and Test — EXECUTE
+- [x] Code Generation — Part 1 (plan) + Part 2 (generation) complete (awaiting approval) · code-summary at aidlc-docs/construction/nfse-ingestion/code/
+- [x] Build and Test — Instructions generated; static verification PASS (typecheck + DSL validation). Dynamic suites + live e2e pending dev env. (awaiting approval)
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations — PLACEHOLDER

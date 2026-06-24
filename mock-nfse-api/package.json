@@ -1,0 +1,18 @@
+{
+  "name": "mock-nfse-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POC mock NFS-e source API — lists and serves sample NFS-e PDFs for the nfse-ingest workflow.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14"
+  }
+}

@@ -101,14 +101,14 @@ function NavLink({
       className={cn(
         "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
         isActive
-          ? "bg-[--color-sidebar-active-bg] text-[--color-sidebar-active-fg] shadow-sm"
-          : "text-[--color-sidebar-foreground] hover:bg-[--color-sidebar-hover-bg] hover:text-white"
+          ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+          : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
       )}
     >
       <Icon
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
-          isActive ? "text-white/90" : "text-[--color-sidebar-foreground] group-hover:text-white/80"
+          isActive ? "text-white/90" : "text-sidebar-foreground group-hover:text-white/80"
         )}
       />
       {label}
@@ -137,14 +137,14 @@ function WorkflowNavLink({
       className={cn(
         "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
         active
-          ? "bg-[--color-sidebar-active-bg] text-[--color-sidebar-active-fg] shadow-sm"
-          : "text-[--color-sidebar-foreground] hover:bg-[--color-sidebar-hover-bg] hover:text-white"
+          ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+          : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
       )}
     >
       <Icon
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
-          active ? "text-white/90" : "text-[--color-sidebar-foreground] group-hover:text-white/80"
+          active ? "text-white/90" : "text-sidebar-foreground group-hover:text-white/80"
         )}
       />
       {label}
@@ -165,7 +165,7 @@ function Sidebar() {
       style={{ background: "var(--color-sidebar)" }}
     >
       {/* Logo / Brand */}
-      <div className="h-14 flex items-center gap-3 px-5 border-b border-[--color-sidebar-border] shrink-0">
+      <div className="h-14 flex items-center gap-3 px-5 border-b border-sidebar-border shrink-0">
         <div
           className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: "var(--color-primary)" }}
@@ -188,8 +188,8 @@ function Sidebar() {
           className={cn(
             "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
             isDashboard
-              ? "bg-[--color-sidebar-active-bg] text-[--color-sidebar-active-fg] shadow-sm"
-              : "text-[--color-sidebar-foreground] hover:bg-[--color-sidebar-hover-bg] hover:text-white"
+              ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+              : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
           )}
         >
           <LayoutDashboard
@@ -197,7 +197,7 @@ function Sidebar() {
               "h-4 w-4 shrink-0",
               isDashboard
                 ? "text-white/90"
-                : "text-[--color-sidebar-foreground] group-hover:text-white/80"
+                : "text-sidebar-foreground group-hover:text-white/80"
             )}
           />
           Dashboard
@@ -208,8 +208,8 @@ function Sidebar() {
           className={cn(
             "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
             isWorkflows
-              ? "bg-[--color-sidebar-active-bg] text-[--color-sidebar-active-fg] shadow-sm"
-              : "text-[--color-sidebar-foreground] hover:bg-[--color-sidebar-hover-bg] hover:text-white"
+              ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+              : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
           )}
         >
           <GitBranch
@@ -217,7 +217,7 @@ function Sidebar() {
               "h-4 w-4 shrink-0",
               isWorkflows
                 ? "text-white/90"
-                : "text-[--color-sidebar-foreground] group-hover:text-white/80"
+                : "text-sidebar-foreground group-hover:text-white/80"
             )}
           />
           Workflows
@@ -267,8 +267,8 @@ function Sidebar() {
           className={cn(
             "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
             isWorkflowHistory
-              ? "bg-[--color-sidebar-active-bg] text-[--color-sidebar-active-fg] shadow-sm"
-              : "text-[--color-sidebar-foreground] hover:bg-[--color-sidebar-hover-bg] hover:text-white"
+              ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+              : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
           )}
         >
           <History
@@ -276,10 +276,31 @@ function Sidebar() {
               "h-4 w-4 shrink-0",
               isWorkflowHistory
                 ? "text-white/90"
-                : "text-[--color-sidebar-foreground] group-hover:text-white/80"
+                : "text-sidebar-foreground group-hover:text-white/80"
             )}
           />
           Workflow history
+        </Link>
+
+        <Link
+          to="/nfse"
+          aria-current={location.pathname.startsWith("/nfse") ? "page" : undefined}
+          className={cn(
+            "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+            location.pathname.startsWith("/nfse")
+              ? "bg-sidebar-active-bg text-sidebar-active-fg shadow-sm"
+              : "text-sidebar-foreground hover:bg-sidebar-hover-bg hover:text-white"
+          )}
+        >
+          <FileText
+            className={cn(
+              "h-4 w-4 shrink-0",
+              location.pathname.startsWith("/nfse")
+                ? "text-white/90"
+                : "text-sidebar-foreground group-hover:text-white/80"
+            )}
+          />
+          NFS-e Extractions
         </Link>
       </nav>
     </aside>

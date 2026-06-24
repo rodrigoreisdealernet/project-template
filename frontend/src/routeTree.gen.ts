@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkflowsIndexRouteImport } from './routes/workflows/index'
+import { Route as NfseIndexRouteImport } from './routes/nfse/index'
 import { Route as WorkflowsTriggerRouteImport } from './routes/workflows/trigger'
 import { Route as WorkflowsHistoryRouteImport } from './routes/workflows/history'
 import { Route as WorkflowsWorkflowIdRouteImport } from './routes/workflows/$workflowId'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const WorkflowsIndexRoute = WorkflowsIndexRouteImport.update({
   id: '/workflows/',
   path: '/workflows/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NfseIndexRoute = NfseIndexRouteImport.update({
+  id: '/nfse/',
+  path: '/nfse/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkflowsTriggerRoute = WorkflowsTriggerRouteImport.update({
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/workflows/$workflowId': typeof WorkflowsWorkflowIdRoute
   '/workflows/history': typeof WorkflowsHistoryRoute
   '/workflows/trigger': typeof WorkflowsTriggerRoute
+  '/nfse/': typeof NfseIndexRoute
   '/workflows/': typeof WorkflowsIndexRoute
   '/entities/$entityType/$id': typeof EntitiesEntityTypeIdRoute
   '/workflows/definitions/$name': typeof WorkflowsDefinitionsNameRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/workflows/$workflowId': typeof WorkflowsWorkflowIdRoute
   '/workflows/history': typeof WorkflowsHistoryRoute
   '/workflows/trigger': typeof WorkflowsTriggerRoute
+  '/nfse': typeof NfseIndexRoute
   '/workflows': typeof WorkflowsIndexRoute
   '/entities/$entityType/$id': typeof EntitiesEntityTypeIdRoute
   '/workflows/definitions/$name': typeof WorkflowsDefinitionsNameRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/workflows/$workflowId': typeof WorkflowsWorkflowIdRoute
   '/workflows/history': typeof WorkflowsHistoryRoute
   '/workflows/trigger': typeof WorkflowsTriggerRoute
+  '/nfse/': typeof NfseIndexRoute
   '/workflows/': typeof WorkflowsIndexRoute
   '/entities/$entityType/$id': typeof EntitiesEntityTypeIdRoute
   '/workflows/definitions/$name': typeof WorkflowsDefinitionsNameRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/workflows/$workflowId'
     | '/workflows/history'
     | '/workflows/trigger'
+    | '/nfse/'
     | '/workflows/'
     | '/entities/$entityType/$id'
     | '/workflows/definitions/$name'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/workflows/$workflowId'
     | '/workflows/history'
     | '/workflows/trigger'
+    | '/nfse'
     | '/workflows'
     | '/entities/$entityType/$id'
     | '/workflows/definitions/$name'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/workflows/$workflowId'
     | '/workflows/history'
     | '/workflows/trigger'
+    | '/nfse/'
     | '/workflows/'
     | '/entities/$entityType/$id'
     | '/workflows/definitions/$name'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   WorkflowsWorkflowIdRoute: typeof WorkflowsWorkflowIdRoute
   WorkflowsHistoryRoute: typeof WorkflowsHistoryRoute
   WorkflowsTriggerRoute: typeof WorkflowsTriggerRoute
+  NfseIndexRoute: typeof NfseIndexRoute
   WorkflowsIndexRoute: typeof WorkflowsIndexRoute
   EntitiesEntityTypeIdRoute: typeof EntitiesEntityTypeIdRoute
   WorkflowsDefinitionsNameRoute: typeof WorkflowsDefinitionsNameRoute
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       path: '/workflows'
       fullPath: '/workflows/'
       preLoaderRoute: typeof WorkflowsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nfse/': {
+      id: '/nfse/'
+      path: '/nfse'
+      fullPath: '/nfse/'
+      preLoaderRoute: typeof NfseIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workflows/trigger': {
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkflowsWorkflowIdRoute: WorkflowsWorkflowIdRoute,
   WorkflowsHistoryRoute: WorkflowsHistoryRoute,
   WorkflowsTriggerRoute: WorkflowsTriggerRoute,
+  NfseIndexRoute: NfseIndexRoute,
   WorkflowsIndexRoute: WorkflowsIndexRoute,
   EntitiesEntityTypeIdRoute: EntitiesEntityTypeIdRoute,
   WorkflowsDefinitionsNameRoute: WorkflowsDefinitionsNameRoute,

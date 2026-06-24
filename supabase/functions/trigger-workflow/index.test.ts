@@ -6,6 +6,10 @@ Deno.test("allows smoke-classification definition", () => {
   assertEquals(isTriggerableDefinition("smoke-classification"), true);
 });
 
+Deno.test("allows nfse-ingest definition", () => {
+  assertEquals(isTriggerableDefinition("nfse-ingest"), true);
+});
+
 Deno.test("rejects mutating vertical-classification definition", () => {
   assertEquals(isTriggerableDefinition("vertical-classification"), false);
 });

@@ -99,3 +99,53 @@ Complete audit trail of user inputs and AI responses. Append-only.
 **Context**: CONSTRUCTION — entering Code Generation planning.
 
 ---
+
+## Code Generation — Part 1 (Plan) Created
+**Timestamp**: 2026-06-24T15:39:19Z
+**AI Prompt**: "Ready to proceed with this code generation plan?"
+**User Input**: (pending — awaiting approval)
+**AI Response**: Created aidlc-docs/construction/plans/nfse-ingestion-code-generation-plan.md — 10 numbered steps with checkboxes + FR/BR traceability: (1) env wiring, (2) mock NFS-e API compose service, (3) nfse-ingest DSL definition incl. Design-C dedup + design-risk check, (4) activation migration, (5) Edge whitelist, (6) Temporal Schedule bootstrap (15s/SKIP), (7) frontend results page + Scan now, (8) example-based tests, (9) ADR-0152, (10) code summaries. ~12–16 files, additive, no PBT. Awaiting plan approval before Part 2 generation.
+**Context**: CONSTRUCTION — Code Generation Part 1; awaiting plan approval.
+
+---
+
+## Code Generation — Part 1 Approved; Part 2 Started
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado"
+**AI Response**: Plan approved. Marked Part 1 complete. Began Part 2 generation — first reading DSL interpreter/expression + http_request/supabase_mutate signatures + an existing definition to ground the nfse-ingest definition and resolve the Design-C dedup risk.
+**Context**: CONSTRUCTION — Code Generation Part 2 in progress.
+
+---
+
+## Code Generation — Part 2 Complete
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: (pending — awaiting approval)
+**AI Response**: Generated all 10 steps. Created: mock-nfse-api service (3 files), nfse_list_new activity, nfse-ingest.json definition, activation migration, schedule bootstrap script, frontend results route + registry json, ADR-0152, 3 tests, code-summary. Modified: .env.example, .env (gitignored), docker-compose.yml, config.ts, worker.ts, trigger-workflow index+test, Makefile, frontend definitions.ts, __root.tsx. DESIGN-RISK RESOLVED: Design-C per-item DSL dedup infeasible ($env reads var-bag not process.env; supabase_query is stub) → implemented dedup via new nfse_list_new activity; back-propagated to functional-design docs + ADR-0152. Presented 2-option completion gate.
+**Context**: CONSTRUCTION — Code Generation complete; awaiting approval to proceed to Build and Test.
+
+---
+
+## Code Generation — Approval
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado"
+**AI Response**: Code generation approved. Proceeding to Build and Test (generate instructions + run feasible verification: typecheck, definition validation, unit tests).
+**Context**: CONSTRUCTION — entering Build and Test.
+
+---
+
+## Build and Test Stage
+**Timestamp**: 2026-06-24T15:39:19Z
+**Build Status**: Success (static): worker typecheck `tsc -p tsconfig.test.json` exit 0; DSL definition validated via validateDefinition (all 7 checks pass).
+**Test Status**: Unit tests written (worker definition + dedup, edge whitelist, frontend low-confidence). Full jest/vitest/deno runs + live e2e pending complete dev env (sandbox had partial test runner — ts-jest resolution). 
+**Files Generated**: build-instructions.md, unit-test-instructions.md, integration-test-instructions.md, build-and-test-summary.md.
+**Context**: CONSTRUCTION — Build and Test complete; awaiting approval. Operations is placeholder. Day-2 SDD step 5 (open PR) is the real-world follow-up.
+
+---
+
+## Build and Test — Approval (AIDLC construction complete)
+**Timestamp**: 2026-06-24T15:39:19Z
+**User Input**: "Aprovado. Utilize o máximo de sub agents que conseguir. Crie um HTML me apresentando o status de cada tarefa executada por cada sub agent, mantenha esse HTML atualizado"
+**AI Response**: Build and Test approved — AIDLC construction complete for nfse-ingestion (Operations is placeholder). Per user request, launching a parallel sub-agent QA/review fan-out over the feature and rendering a live status dashboard at reports/nfse-qa-dashboard.html.
+**Context**: Post-AIDLC verification fan-out.
+
+---

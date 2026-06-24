@@ -60,12 +60,28 @@ services:
     ports:
       - "127.0.0.1:8081:8080"
 
+  mock-nfse-api:
+    build: ./mock-nfse-api
+    container_name: mock-nfse-api
+    restart: unless-stopped
+    environment:
+      - PORT=8090
+      - INVOICES_DIR=/app/invoices
+      - PUBLIC_BASE_URL=${NFSE_SOURCE_API_URL:-http://mock-nfse-api:8090}
+    volumes:
+      # Serve the sample NFS-e PDFs (read-only). Drop more PDFs here to ingest them.
+      - ./docs/examples:/app/invoices:ro
+    ports:
+      - "127.0.0.1:8090:8090"
+
   temporal-worker:
     build: ./temporal
     container_name: temporal-worker
     restart: unless-stopped
     depends_on:
       temporal:
+        condition: service_started
+      mock-nfse-api:
         condition: service_started
     env_file:
       - path: .env.temporal.example
@@ -102,6 +118,9 @@ services:
       - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
       # Exa Search (web_search / web_crawl) — gracefully stubs without this key
       - EXA_API_KEY=${EXA_API_KEY:-}
+      # NFS-e ingestion source (mock API on the compose network; real API in prod)
+      - NFSE_SOURCE_API_URL=${NFSE_SOURCE_API_URL:-http://mock-nfse-api:8090}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
     ports:
       - "127.0.0.1:${HTTP_PORT:-3001}:${HTTP_PORT:-3001}"
 

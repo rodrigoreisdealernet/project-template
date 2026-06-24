@@ -49,4 +49,10 @@ export const config = {
   get exaApiKey() {
     return process.env.EXA_API_KEY ?? "";
   },
+
+  // NFS-e ingestion source API (feature: nfse-ingest).
+  // POC: the local mock-nfse-api compose service. Production: the real invoices API.
+  get nfseSourceApiUrl() {
+    return process.env.NFSE_SOURCE_API_URL ?? "http://mock-nfse-api:8090";
+  },
 };

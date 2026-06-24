@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NFS-e Ingestion — QA Sub-Agent Dashboard</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#121a2b; --card2:#0f1726; --line:#22304a;
+    --fg:#e7eef9; --muted:#93a4c0; --accent:#37e0b0; --teal:#0fb6a8;
+    --pass:#34d399; --warn:#fbbf24; --fail:#f87171; --run:#60a5fa; --pend:#64748b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(160deg,#0b1220,#0e1626);color:var(--fg);
+       font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 24px 64px}
+  header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;
+       border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px}
+  .kicker{color:var(--accent);font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
+  h1{margin:.2em 0 0;font-size:28px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px;max-width:760px}
+  .meta{text-align:right;color:var(--muted);font-size:12px}
+  .summary{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px;align-items:center}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
+  .pill b{font-size:14px}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .bar{flex:1;min-width:200px;height:10px;border-radius:999px;background:#0c1525;border:1px solid var(--line);overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(348px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pend)}
+  .card.pass::before{background:var(--pass)} .card.warn::before{background:var(--warn)}
+  .card.fail::before{background:var(--fail)} .card.run::before{background:var(--run)}
+  .card h3{margin:0 0 2px;font-size:15px}
+  .aid{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .scope{color:var(--muted);font-size:12.5px;margin:8px 0 6px}
+  .vsum{font-size:12.5px;margin:6px 0 4px}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;
+         padding:4px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+  .badge.pass{color:var(--pass);border-color:#1f5f49} .badge.warn{color:var(--warn);border-color:#6b5417}
+  .badge.fail{color:var(--fail)} .badge.run{color:var(--run)} .badge.pend{color:var(--pend)}
+  .findings{margin:8px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted)}
+  .findings li{padding:5px 0 5px 16px;position:relative;border-top:1px dashed var(--line)}
+  .findings li:first-child{border-top:none}
+  .findings li::before{content:"›";position:absolute;left:0;color:var(--teal);font-weight:700}
+  .findings li.w::before{content:"⚠";color:var(--warn)}
+  .findings li.ok::before{content:"✓";color:var(--pass)}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  footer{margin-top:28px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px;line-height:1.7}
+  code{background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="kicker">AI Accelerator · Dev Track Day 2 · Session 2</div>
+      <h1>NFS-e Ingestion — QA Sub-Agent Dashboard</h1>
+      <div class="sub">Revisão paralela (read-only) da feature <code>nfse-ingest</code> — extração automática de NFS-e via Temporal + Azure gpt-5.4. Cada cartão = um sub-agente independente.</div>
+    </div>
+    <div class="meta">
+      Gerado: <strong>2026-06-24</strong><br/>
+      Status geral: <strong id="overall" style="color:var(--warn)">✅ Concluído · 2 ressalvas</strong><br/>
+      Agentes: <strong>9 / 9 concluídos</strong>
+    </div>
+  </header>
+
+  <div class="summary">
+    <span class="pill"><span class="dot" style="background:var(--pass)"></span>PASS <b>7</b></span>
+    <span class="pill"><span class="dot" style="background:var(--warn)"></span>WARN <b>2</b></span>
+    <span class="pill"><span class="dot" style="background:var(--fail)"></span>FAIL <b>0</b></span>
+    <span class="bar" title="7 PASS / 2 WARN / 0 FAIL">
+      <i style="width:77.8%;background:var(--pass)"></i><i style="width:22.2%;background:var(--warn)"></i>
+    </span>
+  </div>
+
+  <div class="grid">
+
+    <div class="card pass" id="A1">
+      <div class="row"><h3>Worker activity</h3><span class="badge warn">⚠ WARN</span></div>
+      <div class="aid">Agent 01 · nfse_list_new.ts · config.ts · worker.ts</div>
+      <div class="vsum">Activity funcional e bem registrada; ressalva de escala na leitura de dedup.</div>
+      <ul class="findings">
+        <li class="ok">Config <code>nfseSourceApiUrl</code>, headers service-role (apikey+Bearer) e lógica de dedup corretos.</li>
+        <li class="w">Leitura de dedup <code>select=source_url</code> sem <code>limit</code> → sujeita ao max-rows do PostgREST (~1000). OK p/ POC; paginar p/ escala.</li>
+        <li class="w"><code>fetch</code> da fonte sem timeout/abort → fonte travada bloqueia até o start-to-close.</li>
+        <li>Menor: sem guarda de parse em <code>res.json()</code>; <code>id</code>/<code>filename</code> não validados.</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A2">
+      <div class="row"><h3>Definição DSL</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 02 · nfse-ingest.json vs interpreter/expression</div>
+      <div class="vsum">Estruturalmente válida; todas as refs resolvem contra os shapes reais das activities.</div>
+      <ul class="findings">
+        <li class="ok">Refs <code>$var.listing.invoices</code>, <code>.inv.content_url</code>, <code>.doc.text</code>, <code>.extraction.parsed(.confidence)</code>, <code>.listing.run_at</code> resolvem.</li>
+        <li class="ok"><code>condition content_filter_blocked == false</code> parseada corretamente (grava só quando não bloqueado).</li>
+        <li class="ok"><code>supabase_mutate</code> upsert válido (match.source_url → on_conflict); for_each + try_catch isolam falha por nota.</li>
+        <li>Menor (cosmético): vars do corpo vazam ao pai (último vence); <code>index_var</code> não usado.</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A3">
+      <div class="row"><h3>Migração Supabase</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 03 · seed_nfse_ingest_definition.sql</div>
+      <div class="vsum">Seed idempotente, aditivo e satisfaz todas as constraints do schema.</div>
+      <ul class="findings">
+        <li class="ok"><code>INSERT ... ON CONFLICT (name,version) DO UPDATE</code> idempotente.</li>
+        <li class="ok"><code>chk_definition_structure</code> + semver satisfeitos; <code>is_active=true</code>+<code>approved</code> válidos (sem conflito de ativo).</li>
+        <li class="ok">Aditivo; reusa <code>workflow_document_extractions</code>; <code>$$…$$</code> jsonb parseia.</li>
+        <li>Menor: texto de <code>description</code> difere do arquivo (não estrutural).</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A4">
+      <div class="row"><h3>Edge Function</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 04 · trigger-workflow whitelist + teste</div>
+      <div class="vsum">Whitelist correta; JWT preservado; teste exato; contrato do frontend bate.</div>
+      <ul class="findings">
+        <li class="ok"><code>TRIGGERABLE_DEFINITIONS = {smoke-classification, nfse-ingest}</code>.</li>
+        <li class="ok">JWT/Bearer validado antes do whitelist; forward p/ <code>TEMPORAL_TRIGGER_URL</code> intacto.</li>
+        <li class="ok">Frontend envia <code>{definition_name:"nfse-ingest", input:{}}</code> — válido (input objeto).</li>
+        <li>Menor: qualquer usuário autenticado pode disparar (sem role por-definição) — confirmar modelo de autorização.</li>
+      </ul>
+    </div>
+
+    <div class="card warn" id="A5">
+      <div class="row"><h3>Frontend</h3><span class="badge warn">⚠ WARN</span></div>
+      <div class="aid">Agent 05 · routes/nfse · definitions · __root</div>
+      <div class="vsum">Implementação correta e alinhada ao padrão existente; falta regenerar a route tree.</div>
+      <ul class="findings">
+        <li class="w"><code>routeTree.gen.ts</code> não tem <code>/nfse</code> — regenera no <code>dev</code>/<code>build</code> (plugin TanStack Vite). Até lá <code>&lt;Link to="/nfse"&gt;</code> não typecheck. Sem edição manual.</li>
+        <li class="ok">Select supabase usa colunas reais; useQuery/invalidate corretos; QueryClientProvider presente.</li>
+        <li class="ok">Scan-now segue o padrão do <code>trigger.tsx</code> (bearer, definition_name); sidebar/badge OK.</li>
+        <li>Menor: UI diz “a cada 15s” mas o poll é 5s (cosmético).</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A6">
+      <div class="row"><h3>Mock API</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 06 · mock-nfse-api server/Dockerfile</div>
+      <div class="vsum">Lista e serve PDFs corretamente; guarda de path-traversal sólida; non-root.</div>
+      <ul class="findings">
+        <li class="ok">Encoding list↔content consistente (nomes com espaço round-trip).</li>
+        <li class="ok">Path-traversal por allowlist (re-listagem + match exato) → <code>../</code>/não-PDF dão 404.</li>
+        <li class="ok"><code>content_url</code> usa <code>PUBLIC_BASE_URL</code> (worker alcança em <code>mock-nfse-api:8090</code>); Dockerfile prod-only, non-root.</li>
+        <li>Menor: MIME fixo <code>application/pdf</code> (consistente com filtro <code>.pdf</code>) — ok p/ POC.</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A7">
+      <div class="row"><h3>Segurança</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 07 · segredos · write-path · auth</div>
+      <div class="vsum">Nenhum segredo commitado; escrita service-role-only; auth/MFA preservados.</div>
+      <ul class="findings">
+        <li class="ok"><strong>Nenhum segredo no repo</strong>: a chave só existe no <code>.env</code> gitignored/untracked (<code>git check-ignore</code> + <code>ls-files</code> confirmam); <code>.env.example</code> sem segredo.</li>
+        <li class="ok">Escrita em <code>workflow_document_extractions</code> só por service-role; front apenas lê (grants revogam authenticated/anon + teste).</li>
+        <li class="ok">Rota <code>/nfse</code> atrás de AuthGate→MfaGate; edge valida JWT.</li>
+        <li>Nota: rotacionar a chave Azure após o lab; substituir mock pela API real autenticada em prod.</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A8">
+      <div class="row"><h3>Consistência / sync</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 08 · definição (arquivo↔migração↔schedule↔registry)</div>
+      <div class="vsum">Definição consistente nas 4 fontes; wiring compose/mock/activity concorda.</div>
+      <ul class="findings">
+        <li class="ok">Paridade: arquivo ↔ migração (name/version/steps/activities/table <code>workflow_document_extractions</code>/provider/model).</li>
+        <li class="ok"><code>bootstrap-nfse-schedule.ts</code> lê o arquivo; <code>DSLWorkflow {definition,input:{}}</code>, 15s, SKIP, queue <code>main</code>/ns <code>default</code>.</li>
+        <li class="ok">Compose: <code>NFSE_SOURCE_API_URL</code> ↔ <code>mock-nfse-api:8090</code> + <code>depends_on</code>; contrato GET /invoices alinhado à activity.</li>
+        <li>Menor: só o <code>description</code> difere entre arquivo e migração.</li>
+      </ul>
+    </div>
+
+    <div class="card pass" id="A9">
+      <div class="row"><h3>Rastreabilidade / ADR</h3><span class="badge pass">✓ PASS</span></div>
+      <div class="aid">Agent 09 · FR-1..10 / BR-1..19 → código · ADR-0152</div>
+      <div class="vsum">Todos os requisitos atendidos e mapeados; ADR reflete o build. Sem GAPs.</div>
+      <ul class="findings">
+        <li class="ok">FR-1..10 atendidos (mock API, ingest DSL, Azure gpt-5.4, persistência, 19 campos, dedup, schedule+scan, tela, ativação, content-filter).</li>
+        <li class="ok">BR-1..19 cobertos; <code>response_schema</code> com os 19 campos (required/nullable corretos).</li>
+        <li class="ok">ADR-0152 reflete o que foi construído (workflow shape, model hosting, dedup, source pluggable).</li>
+        <li>Menor: definição duplicada em 3 lugares (sync risk — já citado no próprio ADR).</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer>
+    <strong>Síntese:</strong> 7 PASS · 2 WARN · 0 FAIL. Nenhum bloqueador. Ações sugeridas (ambas WARN):
+    (1) <strong>route tree</strong> — regenera sozinha no <code>make up</code>/<code>npm run dev|build</code> (plugin TanStack); nada a editar.
+    (2) <strong>leitura de dedup</strong> — adicionar paginação/limite em <code>nfse_list_new</code> antes de escala (irrelevante para a POC com poucas notas).<br/>
+    Sub-agentes read-only · feature <code>nfse-ingest</code> · dashboard pós-AIDLC mantido em <code>reports/nfse-qa-dashboard.html</code>.
+  </footer>
+</div>
+</body>
+</html>

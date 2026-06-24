@@ -39,6 +39,8 @@ Technology-agnostic description of how the automated NFS-e ingestion behaves. (N
 - **Alternative B (upsert-only, no pre-check)**: rejected — would re-run the model for already-processed invoices every 15s (cost).
 - **Open implementation risk to validate in Code Generation**: confirm the DSL `condition.if` can evaluate "result array is empty" (e.g., length/emptiness expression). If not expressible, fall back to a minimal `transform_data`/helper to compute a boolean `is_new`.
 
+> **RESOLVED at Code Generation (back-propagated):** Design C was infeasible — the DSL expression layer resolves `$env.*` from the workflow variable bag, NOT the worker `process.env`, so a DSL step cannot authenticate to Supabase to read existing `source_url`s (and `supabase_query` read is a stub). **Chosen implementation:** a small new activity **`nfse_list_new`** lists the source API AND filters already-extracted invoices server-side (where `config` exposes the Supabase URL + service key), returning only new invoices. The workflow becomes: `nfse_list_new` → `for_each(new invoice)` → `file_extract` → `llm_agent` → `condition(content_filter)` → `supabase_mutate`. See ADR-0152.
+
 ## Mock API behavior (POC source)
 - `GET /invoices` → `[{ id, filename, content_url }]` for each PDF under `docs/examples/` (content_url points back at this service).
 - `GET /invoices/:id/content` → streams the PDF (`Content-Type: application/pdf`).
