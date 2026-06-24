@@ -1,27 +1,28 @@
 # Engineering health dashboard
 
-Generated: 2026-06-23 02:55Z
+Generated: 2026-06-24 14:39Z
 
 ## CI suites
 
 | Suite | Last outcome | Last run | Pass 24h | Pass 7d | SLO | Streak |
 |---|---|---|---:|---:|---|---:|
-| `unit` | — | — | — | — | ✅ ≥95% | 0 |
-| `temporal` | — | — | — | — | ✅ ≥90% | 0 |
-| `helm` | — | — | — | — | ✅ ≥99% | 0 |
-| `seed` | — | — | — | — | ✅ ≥99% | 0 |
+| `unit` | — | — | — | — | — | 0 |
+| `temporal` | — | — | — | — | — | 0 |
+| `helm` | — | — | — | — | — | 0 |
+| `seed` | — | — | — | — | — | 0 |
 
 ## E2E suites
 
 | Suite | Last outcome | Last run | Pass 24h | Pass 7d | SLO | Streak |
 |---|---|---|---:|---:|---|---:|
-| `smoke` | — | — | — | — | ✅ ≥95% | 0 |
-| `experience` | — | — | — | — | ✅ ≥80% | 0 |
+| `smoke` | — | — | — | — | — | 0 |
+| `experience` | — | — | — | — | — | 0 |
 
 ## Deployments
 
 | Env×Cloud | Last deployed | SHA | Outcome | Pass 7d | Staleness |
 |---|---|---|---|---:|---|
+| `dev-azure` | 2026-06-24 14:39Z | `c086b8c` | ⏭️ skipped | 0% (1) | 0h |
 
 ## Code quality
 
