@@ -347,8 +347,11 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+[edge_runtime.secrets]
+# Worker HTTP trigger endpoint used by the trigger-workflow Edge Function.
+# The worker joins the Supabase network (see docker-compose.yml) so it is
+# reachable here by its compose service name. Override per environment as needed.
+TEMPORAL_TRIGGER_URL = "http://temporal-worker:3001/workflows/trigger"
 
 [analytics]
 enabled = true
