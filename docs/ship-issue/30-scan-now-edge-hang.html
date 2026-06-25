@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="4">
+    <title>ship-issue #30 — Fix NFS-e &quot;Scan now&quot; button: Edge Function hangs (getUser no-arg) + TEMPORAL_TRIGGER_URL unwired</title>
+    <style>
+      :root { color-scheme: light dark; --bg:#0f1419; --card:#1a212b; --line:#2a3543; --txt:#e6edf3; --muted:#8b98a5; --accent:#3b82f6; --ok:#22c55e; --run:#eab308; --wait:#f59e0b; --fail:#ef4444; }
+      * { box-sizing: border-box; }
+      body { margin:0; padding:24px; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
+      .wrap { max-width: 860px; margin: 0 auto; }
+      header { border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:16px; }
+      h1 { font-size:18px; margin:0 0 6px; }
+      .meta { color:var(--muted); font-size:13px; display:flex; flex-wrap:wrap; gap:14px; }
+      .meta a { color:var(--accent); text-decoration:none; }
+      .muted { color:var(--muted); }
+      .progress { margin:14px 0 4px; height:8px; background:var(--line); border-radius:6px; overflow:hidden; }
+      .progress > span { display:block; height:100%; background:var(--ok); transition:width .3s; }
+      .progress-label { font-size:12px; color:var(--muted); }
+      .banner { padding:10px 14px; border-radius:8px; margin:14px 0; font-size:13px; }
+      .banner.gate { background:rgba(245,158,11,.12); border:1px solid var(--wait); }
+      .banner.live { background:rgba(234,179,8,.12); border:1px solid var(--run); display:flex; align-items:center; }
+      .pulse { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--run); margin-right:8px; animation:pulse 1.2s ease-in-out infinite; }
+      @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.3; transform:scale(.7); } }
+      .banner.ok { background:rgba(34,197,94,.12); border:1px solid var(--ok); }
+      .banner.fail { background:rgba(239,68,68,.12); border:1px solid var(--fail); }
+      .banner code { background:rgba(255,255,255,.08); padding:1px 5px; border-radius:4px; }
+      ol.steps { list-style:none; margin:0; padding:0; }
+      li.step { display:flex; gap:14px; }
+      .step-rail { display:flex; flex-direction:column; align-items:center; }
+      .step-icon { width:26px; height:26px; line-height:26px; text-align:center; border-radius:50%; background:var(--card); border:1px solid var(--line); font-size:14px; }
+      li.step:not(:last-child) .step-rail::after { content:""; flex:1; width:2px; background:var(--line); margin:4px 0; }
+      .step-body { flex:1; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:14px; }
+      .step-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+      .step-n { color:var(--muted); font-variant-numeric:tabular-nums; }
+      .step-name { font-weight:600; }
+      .desc { color:var(--muted); margin:6px 0 0; }
+      .summary { margin:8px 0 0; }
+      .badge { font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid var(--line); text-transform:capitalize; }
+      .owner-human { color:#c4b5fd; border-color:#5b4b8a; }
+      .owner-agent { color:#7dd3fc; border-color:#2b6a8a; }
+      .st { font-weight:600; }
+      .st-pending { color:var(--muted); }
+      .st-running { color:var(--run); border-color:var(--run); }
+      .st-done { color:var(--ok); border-color:var(--ok); }
+      .st-waiting { color:var(--wait); border-color:var(--wait); }
+      .st-failed { color:var(--fail); border-color:var(--fail); }
+      .st-skipped { color:var(--muted); }
+      .status-done .step-icon { color:var(--ok); border-color:var(--ok); }
+      .status-running .step-icon { color:var(--run); border-color:var(--run); }
+      .status-waiting .step-icon { color:var(--wait); border-color:var(--wait); }
+      .status-failed .step-icon { color:var(--fail); border-color:var(--fail); }
+      ul.artifacts, ul.notes { margin:8px 0 0; padding-left:18px; }
+      ul.artifacts a { color:var(--accent); text-decoration:none; }
+      ul.notes { color:var(--muted); }
+      .times { color:var(--muted); font-size:12px; margin:8px 0 0; }
+      footer { color:var(--muted); font-size:12px; margin-top:18px; border-top:1px solid var(--line); padding-top:12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>ship-issue <a href="https://github.com/rodrigoreisdealernet/project-template/issues/30">#30</a> — Fix NFS-e &quot;Scan now&quot; button: Edge Function hangs (getUser no-arg) + TEMPORAL_TRIGGER_URL unwired</h1>
+        <div class="meta">
+          <span>Status: <strong class="st-waiting">waiting</strong></span>
+          <span>Branch: <code>feature/30-scan-now-edge-hang</code></span>
+          <span><span class="muted">no PR yet</span></span>
+          <span>Updated: 2026-06-25T02:08:36.031Z</span>
+        </div>
+        <div class="progress" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100"><span style="width:14%"></span></div>
+        <div class="progress-label">1 / 7 steps complete (14%)</div>
+      </header>
+      
+      <div class="banner gate">⏸ Waiting on a human to <strong>approve the spec</strong>. Re-run <code>/ship-issue 30 --approved</code> to continue.</div>
+      <ol class="steps">
+      <li class="step status-done">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">✓</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">01</span>
+            <span class="step-name">Spec</span>
+            <span class="badge owner-agent">agent</span>
+            <span class="badge st st-done">Done</span>
+          </div>
+          <p class="desc">Draft a short, testable spec from the issue</p>
+          <p class="summary">6 acceptance criteria drafted</p>
+          <ul class="artifacts"><li><a href="docs/specs/30-scan-now-edge-hang.md">Spec</a></li></ul>
+          <ul class="notes"><li>reading issue and role file</li><li>reading code files for context</li><li>drafting acceptance criteria</li></ul>
+          <p class="times">started 2026-06-25T02:07:27.825Z · finished 2026-06-25T02:08:35.835Z · (1m 8s)</p>
+        </div>
+      </li>
+      <li class="step status-waiting">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">⏸</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">02</span>
+            <span class="step-name">Approve spec</span>
+            <span class="badge owner-human">human</span>
+            <span class="badge st st-waiting">Waiting on human</span>
+          </div>
+          <p class="desc">Human approves the spec or sends it back</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      <li class="step status-pending">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">○</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">03</span>
+            <span class="step-name">Code</span>
+            <span class="badge owner-agent">agent</span>
+            <span class="badge st st-pending">Pending</span>
+          </div>
+          <p class="desc">Implement the approved spec</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      <li class="step status-pending">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">○</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">04</span>
+            <span class="step-name">Tests</span>
+            <span class="badge owner-agent">agent</span>
+            <span class="badge st st-pending">Pending</span>
+          </div>
+          <p class="desc">Generate the unit / integration / e2e tests</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      <li class="step status-pending">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">○</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">05</span>
+            <span class="step-name">Test review</span>
+            <span class="badge owner-agent">agent</span>
+            <span class="badge st st-pending">Pending</span>
+          </div>
+          <p class="desc">Audit tests for gaps &amp; weak assertions</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      <li class="step status-pending">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">○</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">06</span>
+            <span class="step-name">Code review</span>
+            <span class="badge owner-agent">agent</span>
+            <span class="badge st st-pending">Pending</span>
+          </div>
+          <p class="desc">Review the diff and post on the PR</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      <li class="step status-pending">
+        <div class="step-rail"><span class="step-icon" aria-hidden="true">○</span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-n">07</span>
+            <span class="step-name">Merge</span>
+            <span class="badge owner-human">human</span>
+            <span class="badge st st-pending">Pending</span>
+          </div>
+          <p class="desc">Human reads the review and merges</p>
+          
+          
+          
+          
+        </div>
+      </li>
+      </ol>
+      <footer>
+        Generated by <code>ship-issue-dashboard.mjs</code>. This page auto-refreshes every 4s while the run is active.
+      </footer>
+    </div>
+  </body>
+</html>
