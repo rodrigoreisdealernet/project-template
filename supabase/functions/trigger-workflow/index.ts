@@ -54,10 +54,19 @@ export async function handleTriggerWorkflowRequest(request: Request): Promise<Re
     });
   }
 
+  const jwt = authorization.slice("Bearer ".length).trim();
+
   const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+    // No session to persist/refresh in an edge function — disabling these avoids
+    // the GoTrueClient lock path that hangs in the Deno edge runtime.
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { headers: { Authorization: authorization } },
   });
-  const { data: userData, error: userError } = await authClient.auth.getUser();
+  // Pass the JWT explicitly. getUser() with NO argument makes GoTrueClient go
+  // through its stored-session/navigator-lock path, which never returns in the
+  // Deno edge runtime (the request hangs forever). With an explicit token it does
+  // a direct GET /auth/v1/user and returns immediately.
+  const { data: userData, error: userError } = await authClient.auth.getUser(jwt);
   if (userError || !userData.user) {
     return jsonResponse(401, { error: "Invalid auth token" });
   }

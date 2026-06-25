@@ -1,0 +1,87 @@
+{
+  "issue": {
+    "number": 30,
+    "title": "Fix NFS-e \"Scan now\" button: Edge Function hangs (getUser no-arg) + TEMPORAL_TRIGGER_URL unwired",
+    "url": "https://github.com/rodrigoreisdealernet/project-template/issues/30"
+  },
+  "slug": "scan-now-edge-hang",
+  "branch": "feature/30-scan-now-edge-hang",
+  "pr": null,
+  "gate": "spec-approval",
+  "startedAt": "2026-06-25T02:07:22.377Z",
+  "updatedAt": "2026-06-25T02:08:36.031Z",
+  "steps": [
+    {
+      "id": "spec",
+      "status": "done",
+      "startedAt": "2026-06-25T02:07:27.825Z",
+      "finishedAt": "2026-06-25T02:08:35.835Z",
+      "summary": "6 acceptance criteria drafted",
+      "notes": [
+        "reading issue and role file",
+        "reading code files for context",
+        "drafting acceptance criteria"
+      ],
+      "artifacts": [
+        {
+          "label": "Spec",
+          "href": "docs/specs/30-scan-now-edge-hang.md"
+        }
+      ]
+    },
+    {
+      "id": "approve",
+      "status": "waiting",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "code",
+      "status": "pending",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "tests",
+      "status": "pending",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "test-review",
+      "status": "pending",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "code-review",
+      "status": "pending",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    },
+    {
+      "id": "merge",
+      "status": "pending",
+      "startedAt": null,
+      "finishedAt": null,
+      "summary": null,
+      "notes": [],
+      "artifacts": []
+    }
+  ]
+}
