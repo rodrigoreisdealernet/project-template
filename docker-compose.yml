@@ -123,6 +123,13 @@ services:
       - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
     ports:
       - "127.0.0.1:${HTTP_PORT:-3001}:${HTTP_PORT:-3001}"
+    # `default` keeps the worker on the compose network (reaches temporal +
+    # mock-nfse-api). `supabase` joins the Supabase stack network so the
+    # trigger-workflow Edge Function can reach this worker's /workflows/trigger
+    # at http://temporal-worker:3001 (see supabase/config.toml TEMPORAL_TRIGGER_URL).
+    networks:
+      - default
+      - supabase
 
   frontend:
     build:
@@ -140,3 +147,14 @@ services:
 
 volumes:
   temporal-db-data:
+
+networks:
+  # Compose's implicit default network (temporal, mock-nfse-api, worker, frontend).
+  default:
+  # The Supabase stack network, created by `supabase start` (named from
+  # config.toml project_id: supabase_network_<project_id>). Declared external so
+  # the worker can join it and be reachable from the Edge Function runtime.
+  # `make up` runs `supabase start` before `docker compose up`, so it exists.
+  supabase:
+    external: true
+    name: supabase_network_project-template
