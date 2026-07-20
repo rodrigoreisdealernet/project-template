@@ -18,10 +18,10 @@
   "dependencies": {
     "@earendil-works/pi-ai": "^0.79.10",
     "@hono/node-server": "^2.0.6",
-    "@temporalio/activity": "^1.18.1",
-    "@temporalio/client": "^1.18.1",
-    "@temporalio/worker": "^1.18.1",
-    "@temporalio/workflow": "^1.18.1",
+    "@temporalio/activity": "^1.20.3",
+    "@temporalio/client": "^1.20.3",
+    "@temporalio/worker": "^1.20.3",
+    "@temporalio/workflow": "^1.20.3",
     "cheerio": "^1.2.0",
     "exceljs": "^4.4.0",
     "hono": "^4.12.27",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",
-    "@temporalio/testing": "^1.18.1",
+    "@temporalio/testing": "^1.20.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.0.0",
     "@types/pdf-parse": "^1.1.5",
