@@ -44,7 +44,7 @@ Generated: 2026-08-13 03:13Z
 | Workflow | Last run | Outcome |
 |---|---|---|
 | `pipeline-daily` | 2026-08-12 07:04Z | ✅ passed |
-| `monitor-actions` | 2026-08-13 00:43Z | ✅ passed |
+| `monitor-actions` | 2026-08-13 03:13Z | ✅ passed |
 | `validate-dsl-definitions` | 2026-06-25 00:11Z | 🟠 error |
 | `validate-ontology` | — | — |
 
