@@ -1,6 +1,6 @@
 # Engineering health dashboard
 
-Generated: 2026-08-15 09:14Z
+Generated: 2026-08-15 09:17Z
 
 ## CI suites
 
@@ -44,7 +44,7 @@ Generated: 2026-08-15 09:14Z
 | Workflow | Last run | Outcome |
 |---|---|---|
 | `pipeline-daily` | 2026-08-15 06:18Z | ✅ passed |
-| `monitor-actions` | 2026-08-15 08:54Z | ✅ passed |
+| `monitor-actions` | 2026-08-15 09:17Z | ✅ passed |
 | `validate-dsl-definitions` | 2026-06-25 00:11Z | 🟠 error |
 | `validate-ontology` | — | — |
 
