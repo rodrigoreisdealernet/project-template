@@ -1,6 +1,6 @@
 # Engineering health dashboard
 
-Generated: 2026-08-30 14:53Z
+Generated: 2026-08-30 15:55Z
 
 ## CI suites
 
@@ -22,7 +22,7 @@ Generated: 2026-08-30 14:53Z
 
 | Env×Cloud | Last deployed | SHA | Outcome | Pass 7d | Staleness |
 |---|---|---|---|---:|---|
-| `dev-azure` | 2026-06-25 02:19Z | `a99f152` | ⏭️ skipped | 0% (11) | 1597h |
+| `dev-azure` | 2026-06-25 02:19Z | `a99f152` | ⏭️ skipped | 0% (11) | 1598h |
 
 ## Code quality
 
@@ -37,7 +37,7 @@ Generated: 2026-08-30 14:53Z
 |---|---|---|---:|
 | `architecture-audit` | 2026-08-30 11:28Z | ✅ passed | 0 |
 | `audit-cis-kubernetes` | 2026-08-30 14:53Z | 🟠 error | 0 |
-| `audit-azure-security` | 2026-08-29 15:54Z | 🟠 error | 0 |
+| `audit-azure-security` | 2026-08-30 15:55Z | 🟠 error | 0 |
 
 ## Ops workflows
 
