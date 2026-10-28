@@ -1,6 +1,6 @@
 # Engineering health dashboard
 
-Generated: 2026-10-28 10:17Z
+Generated: 2026-10-28 10:18Z
 
 ## CI suites
 
@@ -29,7 +29,7 @@ Generated: 2026-10-28 10:17Z
 | Workflow | Last run | Outcome | Metrics |
 |---|---|---|---|
 | `validate-dsl-definitions` | 2026-06-25 00:11Z | 🟠 error | failed_jobs=0, skipped_jobs=0 |
-| `code-quality` | 2026-10-27 09:34Z | ❌ failed | failed_jobs=1, skipped_jobs=0 |
+| `code-quality` | 2026-10-28 10:18Z | ❌ failed | failed_jobs=1, skipped_jobs=0 |
 
 ## Security & audits
 
